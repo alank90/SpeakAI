@@ -1,21 +1,29 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import Home from './components/Home.vue'
-</script>
-
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <Home msg="Welcome to the SpeakAI Site" />
+  <app-navbar></app-navbar>
+  <img alt="AI picture" src="./assets/images/ai_image_sm.png" />
+  <div>
+    <!-- route outlet -->
+    <!-- component matched by the route will render here -->
+    <router-view></router-view>
+  </div>
 </template>
+
+<script setup>
+import appNavbar from "./components/app-navbar.vue";
+</script>
 
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 1280px;
+  margin: 0 auto;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+}
+
+img[alt="AI picture"] {
+  max-width: 750px;
+  border-radius: 6px;
 }
 </style>

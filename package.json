@@ -2,6 +2,7 @@
   "name": "vite-prototype",
   "version": "1.0.0",
   "scripts": {
+    "start": "vite --open",
     "dev": "vite --open",
     "build": "vite build",
     "serve": "vite preview"
