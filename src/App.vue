@@ -1,7 +1,7 @@
 <template>
   <app-navbar></app-navbar>
   <img alt="AI picture" src="./assets/images/ai_image_sm.png" />
-  <div>
+  <div class="flow">
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
     <router-view></router-view>
@@ -24,6 +24,7 @@ import appNavbar from "./components/app-navbar.vue";
 
 img[alt="AI picture"] {
   max-width: 750px;
+  margin: 0 auto;
   border-radius: 6px;
 }
 </style>
