@@ -30,7 +30,6 @@
 
 <script setup>
 import { ref } from "vue";
-console.log(import.meta.env);
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
 
@@ -41,7 +40,6 @@ myHeaders.append(
   `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
 );
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
-console.log(myHeaders);
 
 const content = ref("");
 const BTN_TEXT = "Submit 🚀";
@@ -54,19 +52,32 @@ const askAi = async () => {
   await fetch(openAIURL, {
     method: "POST",
     headers: myHeaders,
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: content.value }],
-    temperature: 0.7,
-  }).then((response) => {
-    console.log(aiResponse.value);
-    aiResponse.value = response.data.choices[0].message.content
-      .catch((e) => {
-        console.log(e);
-      })
-      .finally(() => {
-        btnText.value = BTN_TEXT;
-      });
-  });
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: content.value }],
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not OK");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      aiResponse.value = data.choices[0].message.content;
+      console.log(aiResponse.value);
+    })
+    .catch((error) => {
+      aiResponse.value =
+        "I'm sorry. There was a problem with your request at this time.";
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    })
+    .finally(() => {
+      btnText.value = BTN_TEXT;
+    });
 };
 </script>
 
@@ -80,14 +91,16 @@ h1 {
 .chat {
 } */
 .input {
-  width: calc(100% - 20px);
+  width: calc(85% - 20px);
   height: 32px;
   padding: 12px;
   border: none;
   border-radius: 16px;
   box-shadow: 2px 2px 7px 0 rgb(0, 0, 0, 0.2);
   outline: none;
-  font-size: 16px;
+  font-size: 1.2rem;
+  font-weight: 550;
+  font-family: var(--letter-font);
 }
 
 .input:invalid {
@@ -142,6 +155,7 @@ button svg {
 }
 
 .card {
+  font-family: var(--letter-font);
   background: #07182e;
   position: relative;
   display: flex;
@@ -149,19 +163,16 @@ button svg {
   place-items: center;
   overflow: hidden;
   border-radius: 16px;
-  margin: 24px 0;
-  /* max-height: 420px; */
-}
-
-.card {
-  margin-top: 32px;
+  margin: 32px auto;
+  max-width: 85vw;
 }
 
 .card span,
 .card pre {
   z-index: 1;
-  color: white;
-  font-size: 16px;
+  font-size: 1.1rem;
+  font-family: var(--letter-font);
+  color: #fff;
 }
 
 .card::before {
@@ -190,6 +201,7 @@ button svg {
   display: flex;
   align-items: center;
   justify-content: end;
+  max-width: 85vw;
 }
 .btn {
   display: flex;
