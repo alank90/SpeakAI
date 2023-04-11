@@ -18,7 +18,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100vw;
+  width: auto;
   height: 5%;
   max-height: 125px;
   margin: 0 0 25px 0;
@@ -26,7 +26,7 @@
 }
 
 .navbar-item-one {
-  margin: 0 5px 0;
+  margin: 0 0 5px 2px;
   border-radius: 50%;
   width: 4rem;
 }

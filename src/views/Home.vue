@@ -1,29 +1,44 @@
 <template>
   <h1>Welcome to SpeakAI</h1>
-  <div class="chat">
-    <input
-      type="text"
-      class="input"
-      placeholder="Ask me about ...🌽"
-      v-model="content"
-      clear
-    />
+  <div class="grid-container">
+    <div class="chat">
+      <input
+        type="text"
+        class="input"
+        placeholder="Ask me about ...🌽"
+        v-model="content"
+        clear
+      />
 
-    <div class="button-block">
-      <button type="button" @click="askAi" class="btn">
-        <strong>{{ btnText }}</strong>
-        <div id="container-stars">
-          <div id="stars"></div>
-        </div>
-        <div id="glow">
-          <div class="circle"></div>
-          <div class="circle"></div>
-        </div>
-      </button>
+      <div class="button-block">
+        <button type="button" @click="askAi" class="btn">
+          <strong>{{ btnText }}</strong>
+          <div id="container-stars">
+            <div id="stars"></div>
+          </div>
+          <div id="glow">
+            <div class="circle"></div>
+            <div class="circle"></div>
+          </div>
+        </button>
+      </div>
+
+      <div class="card">
+        <pre>{{ aiResponse }}</pre>
+      </div>
     </div>
 
-    <div class="card">
-      <pre>{{ aiResponse }}</pre>
+    <div class="chat-options">
+      <label for="temperature">Temperature: {{ temperatureValue }}</label>
+      <input
+        type="range"
+        id="temperature"
+        name="temperature"
+        min="0"
+        max="1"
+        step=".1"
+        v-model="temperatureValue"
+      />
     </div>
   </div>
 </template>
@@ -42,6 +57,7 @@ myHeaders.append(
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
 const content = ref("");
+let temperatureValue = ref(0.5);
 const BTN_TEXT = "Submit 🚀";
 const aiResponse = ref("✅ The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
@@ -65,7 +81,6 @@ const askAi = async () => {
     })
     .then((data) => {
       aiResponse.value = data.choices[0].message.content;
-      console.log(aiResponse.value);
     })
     .catch((error) => {
       aiResponse.value =
@@ -87,9 +102,22 @@ h1 {
   margin-bottom: 64px;
 }
 
-/* 
+.grid-container {
+  display: grid;
+  grid-template-columns: 75% 25%;
+  grid-template-rows: auto;
+  grid-template-areas: "chat options";
+  column-gap: 15px;
+}
+
 .chat {
-} */
+  grid-area: chat;
+}
+
+.chat-options {
+  grid-area: options;
+}
+
 .input {
   width: calc(85% - 20px);
   height: 32px;
@@ -106,6 +134,102 @@ h1 {
 .input:invalid {
   animation: justshake 0.3s forwards;
   color: red;
+}
+
+label {
+  color: var(--letter-ai-color);
+  font-family: var(--letter-font);
+  font-size: 1.1rem;
+  font-weight: 550;
+}
+
+/* Range Input stylings */
+input[type="range"] {
+  -webkit-appearance: none;
+  margin: 10px 0;
+  width: 100%;
+}
+input[type="range"]:focus {
+  outline: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 12.8px;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  background: #ac51b5;
+  border-radius: 25px;
+  border: 0px solid #000101;
+}
+input[type="range"]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  border: 0px solid #000000;
+  height: 20px;
+  width: 39px;
+  border-radius: 7px;
+  background: #65001c;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -3.6px;
+}
+input[type="range"]:focus::-webkit-slider-runnable-track {
+  background: #ac51b5;
+}
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 12.8px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  background: #ac51b5;
+  border-radius: 25px;
+  border: 0px solid #000101;
+}
+input[type="range"]::-moz-range-thumb {
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  border: 0px solid #000000;
+  height: 20px;
+  width: 39px;
+  border-radius: 7px;
+  background: #65001c;
+  cursor: pointer;
+}
+input[type="range"]::-ms-track {
+  width: 100%;
+  height: 12.8px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  border-width: 39px 0;
+  color: transparent;
+}
+input[type="range"]::-ms-fill-lower {
+  background: #ac51b5;
+  border: 0px solid #000101;
+  border-radius: 50px;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type="range"]::-ms-fill-upper {
+  background: #ac51b5;
+  border: 0px solid #000101;
+  border-radius: 50px;
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type="range"]::-ms-thumb {
+  box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  border: 0px solid #000000;
+  height: 20px;
+  width: 39px;
+  border-radius: 7px;
+  background: #65001c;
+  cursor: pointer;
+}
+input[type="range"]:focus::-ms-fill-lower {
+  background: #ac51b5;
+}
+input[type="range"]:focus::-ms-fill-upper {
+  background: #ac51b5;
 }
 
 @keyframes justshake {
@@ -172,7 +296,9 @@ button svg {
   z-index: 1;
   font-size: 1.1rem;
   font-family: var(--letter-font);
-  color: #fff;
+  color: var(--letter-ai-color);
+  white-space: pre-wrap;
+  padding: 4px;
 }
 
 .card::before {
@@ -192,7 +318,7 @@ button svg {
 .card::after {
   content: "";
   position: absolute;
-  background: #07182e;
+  background: var(--color-light);
   inset: 5px;
   border-radius: 16px;
 }
