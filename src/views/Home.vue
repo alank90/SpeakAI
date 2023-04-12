@@ -29,6 +29,18 @@
     </div>
 
     <div class="chat-options">
+      <label for="modelt">Model</label>
+      <div class="select">
+        <select id="model">
+          <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
+          <option value="text-davinci-003">Text-davinci-003</option>
+          <option value="text-curie-001">Text-Curie-001</option>
+          <option value="text-babbage-001">Text-Babbage-001</option>
+          <option value="Text-Ada-001">Text-Ada-001</option>
+        </select>
+        <span class="focus"></span>
+      </div>
+
       <label for="temperature">Temperature: {{ temperatureValue }}</label>
       <input
         type="range"
@@ -36,9 +48,42 @@
         name="temperature"
         min="0"
         max="1"
-        step=".1"
+        step=".01"
         v-model="temperatureValue"
       />
+
+      <label for="top_P">Top P: {{ topP }}</label>
+      <input
+        type="range"
+        id="top_P"
+        name="top_P"
+        min="0"
+        max="1"
+        step=".01"
+        v-model="topP"
+      />
+
+      <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
+      <input
+        type="range"
+        id="max_tokens"
+        name="max_tokens"
+        min="0"
+        max="2048"
+        step="5"
+        v-model="maxTokens"
+      />
+
+      <label for="stop_sequences">Stop sequences: {{ stopSequences }}</label>
+      <textarea
+        id="stop_sequences"
+        name="stop_sequences"
+        placeholder="i.e., a . or \n"
+        rows="4"
+        cols="20"
+        @keyup="checkKey"
+      >
+      </textarea>
     </div>
   </div>
 </template>
@@ -58,6 +103,11 @@ myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
 const content = ref("");
 let temperatureValue = ref(0.5);
+let topP = ref(0);
+let maxTokens = ref(100);
+let stopSequences = ref([]);
+let theStopSequence = "";
+
 const BTN_TEXT = "Submit 🚀";
 const aiResponse = ref("✅ The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
@@ -71,6 +121,10 @@ const askAi = async () => {
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: content.value }],
+      temperature: parseFloat(temperatureValue.value),
+      top_p: parseFloat(topP.value),
+      max_tokens: parseInt(maxTokens.value),
+      stop: stopSequences.value,
     }),
   })
     .then((response) => {
@@ -94,6 +148,17 @@ const askAi = async () => {
       btnText.value = BTN_TEXT;
     });
 };
+
+const checkKey = (e) => {
+  let key = e.key;
+  if (key === "Enter") {
+    stopSequences.value.push(theStopSequence);
+    theStopSequence = "";
+  } else {
+    if (key === "Shift") return; // Do nothing if shift key
+    theStopSequence += key;
+  }
+};
 </script>
 
 <style scoped>
@@ -107,11 +172,14 @@ h1 {
   grid-template-columns: 75% 25%;
   grid-template-rows: auto;
   grid-template-areas: "chat options";
-  column-gap: 15px;
+  column-gap: 25px;
+  justify-content: center;
 }
 
 .chat {
   grid-area: chat;
+  border-right: 0.5px solid var(--main-ai-color);
+  padding-right: 10px;
 }
 
 .chat-options {
@@ -143,9 +211,122 @@ label {
   font-weight: 550;
 }
 
-/* Range Input stylings */
+#stop_sequences {
+  font-family: var(--letter-font);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  padding: 10px;
+  max-width: 100%;
+  line-height: 1.5;
+  border-radius: 5px;
+  border: 1px solid var(--select-border);
+  box-shadow: 1px 1px 1px #272626;
+  resize: none;
+}
+
+/* ==== Select Option Input Stylings ====== */
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  padding: 0 1em 0 0;
+  margin: 0;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  line-height: inherit;
+  z-index: 1;
+  outline: none;
+}
+select::-ms-expand {
+  display: none;
+}
+
+.select {
+  display: grid;
+  grid-template-areas: "select";
+  align-items: center;
+  position: relative;
+  min-width: 15ch;
+  max-width: 30ch;
+  border: 1px solid var(--select-border);
+  border-radius: 0.25em;
+  padding: 0.25em 0.5em;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1.1;
+  background-color: #fff;
+  background-image: linear-gradient(to top, #f9f9f9, #ac51b5 33%);
+}
+.select select,
+.select::after {
+  grid-area: select;
+}
+.select:not(.select--multiple)::after {
+  content: "";
+  justify-self: end;
+  width: 0.8em;
+  height: 0.5em;
+  background-color: var(--select-arrow);
+  -webkit-clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+  clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+}
+
+select:focus + .focus {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border: 2px solid var(--select-focus);
+  border-radius: inherit;
+}
+
+select[multiple] {
+  padding-right: 0;
+  /*
+   * Safari will not reveal an option
+   * unless the select height has room to 
+   * show all of it
+   * Firefox and Chrome allow showing 
+   * a partial option
+   */
+  height: 6rem;
+  /* 
+   * Experimental - styling of selected options
+   * in the multiselect
+   * Not supported crossbrowser
+   */
+}
+select[multiple] option {
+  white-space: normal;
+  outline-color: var(--select-focus);
+}
+
+.select--disabled {
+  cursor: not-allowed;
+  background-color: #eee;
+  background-image: linear-gradient(to top, #ddd, #eee 33%);
+}
+
+label {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.select + label {
+  margin-top: 2rem;
+}
+/* === End Select Option Input stylings ===== */
+
+/* ========= Range Input stylings ========== */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   margin: 10px 0;
   width: 100%;
 }
@@ -179,7 +360,6 @@ input[type="range"]::-moz-range-track {
   width: 100%;
   height: 12.8px;
   cursor: pointer;
-  animate: 0.2s;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
   background: #ac51b5;
   border-radius: 25px;
@@ -198,7 +378,6 @@ input[type="range"]::-ms-track {
   width: 100%;
   height: 12.8px;
   cursor: pointer;
-  animate: 0.2s;
   background: transparent;
   border-color: transparent;
   border-width: 39px 0;
@@ -231,6 +410,8 @@ input[type="range"]:focus::-ms-fill-lower {
 input[type="range"]:focus::-ms-fill-upper {
   background: #ac51b5;
 }
+
+/* ====== End Range input stylings =============== */
 
 @keyframes justshake {
   25% {

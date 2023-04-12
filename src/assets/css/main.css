@@ -11,10 +11,13 @@
   --color-dark: #000000;
   --color-light: #f5f5f5;
   --color-primary: #1a8fe3;
-
   --main-ai-color: #353740;
   --heading-ai-color: #202123;
   --letter-ai-color: #42434c;
+  --select-border: #ac51b5;
+  --select-focus: rgb(136, 10, 174);
+  --select-arrow: var(--select-border);
+
   --heading-font: "Old Standard TT", serif;
   --letter-font: "Cormorant", serif;
 }
