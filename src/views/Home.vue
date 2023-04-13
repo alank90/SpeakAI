@@ -24,7 +24,7 @@
       </div>
 
       <div class="card">
-        <pre>{{ aiResponse }}</pre>
+        <pre id="ai_response">{{ aiResponse }}</pre>
       </div>
     </div>
 
@@ -50,7 +50,12 @@
         max="1"
         step=".01"
         v-model="temperatureValue"
+        v-tooltip="'This is a test.'"
       />
+      <div id="tooltip" role="tooltip">
+        My tooltip
+        <div id="arrow" data-popper-arrow></div>
+      </div>
 
       <label for="top_P">Top P: {{ topP }}</label>
       <input
@@ -84,6 +89,10 @@
         @keyup="checkKey"
       >
       </textarea>
+
+      <label for="start_text">Inject start text</label>
+      <textarea name="start_text" id="start_text" cols="20" rows="2">
+      </textarea>
     </div>
   </div>
 </template>
@@ -113,19 +122,27 @@ const aiResponse = ref("✅ The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
 
 /* ================== Methods =============================== */
+/**
+ * @Description - The function constructs & executes the Fetch API call
+ *  to the OpenAI /completions endpoint.
+ */
 const askAi = async () => {
+  // Vars
+  const fetchOptions = {
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: content.value }],
+    temperature: parseFloat(temperatureValue.value),
+    top_p: parseFloat(topP.value),
+    max_tokens: parseInt(maxTokens.value),
+    stop: stopSequences.value.length > 0 ? stopSequences.value : null,
+  };
   btnText.value = "Thinking...🤔";
+
+  // API call
   await fetch(openAIURL, {
     method: "POST",
     headers: myHeaders,
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: content.value }],
-      temperature: parseFloat(temperatureValue.value),
-      top_p: parseFloat(topP.value),
-      max_tokens: parseInt(maxTokens.value),
-      stop: stopSequences.value,
-    }),
+    body: JSON.stringify(fetchOptions),
   })
     .then((response) => {
       if (!response.ok) {
@@ -134,7 +151,8 @@ const askAi = async () => {
       return response.json();
     })
     .then((data) => {
-      aiResponse.value = data.choices[0].message.content;
+      const insertStarterText = starterText();
+      aiResponse.value = `${insertStarterText} ${data.choices[0].message.content}`;
     })
     .catch((error) => {
       aiResponse.value =
@@ -149,6 +167,11 @@ const askAi = async () => {
     });
 };
 
+/**
+ * @Description - Called every time character typed in the <textarea>
+ *  The function builds an array of strings representing the stop sequences
+ * @param {*} e - The event object
+ */
 const checkKey = (e) => {
   let key = e.key;
   if (key === "Enter") {
@@ -159,6 +182,19 @@ const checkKey = (e) => {
     theStopSequence += key;
   }
 };
+
+/**
+ * @Description - Insert starter text into AI response if provided
+ * @Calledby - answerAI
+ * @Returns - any text in the starter text box.
+ */
+
+const starterText = () => {
+  const startText = document.getElementById("start_text").value;
+  return startText;
+};
+
+// ===== Popper Tool
 </script>
 
 <style scoped>
@@ -205,13 +241,15 @@ h1 {
 }
 
 label {
+  display: block;
   color: var(--letter-ai-color);
   font-family: var(--letter-font);
   font-size: 1.1rem;
   font-weight: 550;
 }
 
-#stop_sequences {
+#stop_sequences,
+#start_text {
   font-family: var(--letter-font);
   font-size: 1.1rem;
   letter-spacing: 1px;
@@ -461,7 +499,8 @@ button svg {
 
 .card {
   font-family: var(--letter-font);
-  background: #07182e;
+  font-size: 1.1rem;
+  background: #f9f1fd;
   position: relative;
   display: flex;
   place-content: center;
@@ -475,8 +514,9 @@ button svg {
 .card span,
 .card pre {
   z-index: 1;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-family: var(--letter-font);
+  font-weight: 525;
   color: var(--letter-ai-color);
   white-space: pre-wrap;
   padding: 4px;
@@ -499,7 +539,7 @@ button svg {
 .card::after {
   content: "";
   position: absolute;
-  background: var(--color-light);
+  background: #f9f1fd;
   inset: 5px;
   border-radius: 16px;
 }
