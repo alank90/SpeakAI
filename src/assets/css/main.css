@@ -63,3 +63,13 @@ a {
 li {
   list-style-type: none;
 }
+
+/* ==== Tooltip Overides ==== */
+.v-popper__popper {
+  width: 35%;
+}
+
+.v-popper--theme-tooltip .v-popper__inner {
+  background: #ac51b5;
+  font-family: var(--letter-font);
+}

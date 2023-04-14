@@ -29,14 +29,28 @@
     </div>
 
     <div class="chat-options">
+      <input
+        type="text"
+        class="input api-input"
+        placeholder="API Key here..."
+        v-model="apiKey"
+        clear
+      />
+      <button @click="addAPIKey" class="btn--api-key" id="add-key">
+        Store API Key
+      </button>
+      <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
+        Clear API Key
+      </button>
+
       <label for="modelt">Model</label>
-      <div class="select">
+      <div class="select" v-tooltip="tooltip.model">
         <select id="model">
           <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
           <option value="text-davinci-003">Text-davinci-003</option>
           <option value="text-curie-001">Text-Curie-001</option>
           <option value="text-babbage-001">Text-Babbage-001</option>
-          <option value="Text-Ada-001">Text-Ada-001</option>
+          <option value="text-Ada-001">Text-Ada-001</option>
         </select>
         <span class="focus"></span>
       </div>
@@ -50,12 +64,8 @@
         max="1"
         step=".01"
         v-model="temperatureValue"
-        v-tooltip="'This is a test.'"
+        v-tooltip="tooltip.temperature"
       />
-      <div id="tooltip" role="tooltip">
-        My tooltip
-        <div id="arrow" data-popper-arrow></div>
-      </div>
 
       <label for="top_P">Top P: {{ topP }}</label>
       <input
@@ -66,6 +76,7 @@
         max="1"
         step=".01"
         v-model="topP"
+        v-tooltip="tooltip.top_p"
       />
 
       <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
@@ -77,9 +88,11 @@
         max="2048"
         step="5"
         v-model="maxTokens"
+        v-tooltip="tooltip.max_tokens"
       />
 
-      <label for="stop_sequences">Stop sequences: {{ stopSequences }}</label>
+      <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>
+      <p class="stop-sequence-note">Add sequence then hit Enter</p>
       <textarea
         id="stop_sequences"
         name="stop_sequences"
@@ -87,11 +100,18 @@
         rows="4"
         cols="20"
         @keyup="checkKey"
+        v-tooltip="tooltip.stop_sequence"
       >
       </textarea>
 
       <label for="start_text">Inject start text</label>
-      <textarea name="start_text" id="start_text" cols="20" rows="2">
+      <textarea
+        name="start_text"
+        id="start_text"
+        cols="20"
+        rows="2"
+        v-tooltip="tooltip.start_text"
+      >
       </textarea>
     </div>
   </div>
@@ -99,8 +119,11 @@
 
 <script setup>
 import { ref } from "vue";
+import tooltip from "@/modules/useTooltip.js";
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
+const myAPIKey = localStorage.getItem("ai-key");
+console.log(myAPIKey);
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
@@ -110,6 +133,7 @@ myHeaders.append(
 );
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
+let apiKey = ref("");
 const content = ref("");
 let temperatureValue = ref(0.5);
 let topP = ref(0);
@@ -194,7 +218,23 @@ const starterText = () => {
   return startText;
 };
 
-// ===== Popper Tool
+/**
+ * @description - Event listener to store API key in localstorage
+ */
+
+const addAPIKey = () => {
+  localStorage.setItem("ai-key", apiKey.value);
+  console.log("In setstorage", apiKey);
+};
+
+/**
+ * @Description - Remove the API key
+ */
+
+const clearAPIKey = () => {
+  localStorage.removeItem("ai-key");
+  console.log("In removestorage");
+};
 </script>
 
 <style scoped>
@@ -240,6 +280,13 @@ h1 {
   color: red;
 }
 
+.api-input {
+  height: 24px;
+  font-size: 1.1rem;
+  margin: 0 0 15px 0;
+  padding: 6px;
+}
+
 label {
   display: block;
   color: var(--letter-ai-color);
@@ -260,6 +307,11 @@ label {
   border: 1px solid var(--select-border);
   box-shadow: 1px 1px 1px #272626;
   resize: none;
+}
+
+.stop-sequence-note {
+  margin: -7px 0 0 0;
+  font-size: 0.9rem;
 }
 
 /* ==== Select Option Input Stylings ====== */
@@ -483,6 +535,19 @@ button {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.2s;
+}
+
+.btn--api-key {
+  display: inline;
+  width: 45%;
+  margin: 3px 0 5px;
+  padding: 0;
+  font-size: 0.9rem;
+  background-color: #ac51b5;
+}
+
+#add-key {
+  margin-right: 5px;
 }
 
 button span {
@@ -722,5 +787,13 @@ strong {
     transform: scale(0.75);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
+}
+
+.v-popper__popper {
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  outline: none;
+  width: 150px;
 }
 </style>
