@@ -301,7 +301,8 @@ label {
   font-size: 1.1rem;
   letter-spacing: 1px;
   padding: 10px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 200px;
   line-height: 1.5;
   border-radius: 5px;
   border: 1px solid var(--select-border);
@@ -341,8 +342,9 @@ select::-ms-expand {
   grid-template-areas: "select";
   align-items: center;
   position: relative;
-  min-width: 15ch;
-  max-width: 30ch;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
   border: 1px solid var(--select-border);
   border-radius: 0.25em;
   padding: 0.25em 0.5em;
@@ -419,6 +421,7 @@ input[type="range"] {
   appearance: none;
   margin: 10px 0;
   width: 100%;
+  max-width: 200px;
 }
 input[type="range"]:focus {
   outline: none;
@@ -539,11 +542,16 @@ button {
 
 .btn--api-key {
   display: inline;
-  width: 45%;
+  width: 100%;
+  max-width: 200px;
   margin: 3px 0 5px;
   padding: 0;
   font-size: 0.9rem;
   background-color: #ac51b5;
+}
+
+.btn--api-key:hover {
+  background-color: #ad51b5c4;
 }
 
 #add-key {
@@ -789,11 +797,5 @@ strong {
   }
 }
 
-.v-popper__popper {
-  z-index: 10000;
-  top: 0;
-  left: 0;
-  outline: none;
-  width: 150px;
-}
+
 </style>
