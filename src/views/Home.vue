@@ -2,13 +2,7 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <input
-        type="text"
-        class="input"
-        placeholder="Ask me about ...🌽"
-        v-model="content"
-        clear
-      />
+      <input type="text" class="input" placeholder="Ask me about ...🌽" v-model="content" clear />
 
       <div class="button-block">
         <button type="button" @click="askAi" class="btn">
@@ -29,13 +23,7 @@
     </div>
 
     <div class="chat-options">
-      <input
-        type="text"
-        class="input api-input"
-        placeholder="API Key here..."
-        v-model="apiKey"
-        clear
-      />
+      <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
       <button @click="addAPIKey" class="btn--api-key" id="add-key">
         Store API Key
       </button>
@@ -56,63 +44,25 @@
       </div>
 
       <label for="temperature">Temperature: {{ temperatureValue }}</label>
-      <input
-        type="range"
-        id="temperature"
-        name="temperature"
-        min="0"
-        max="1"
-        step=".01"
-        v-model="temperatureValue"
-        v-tooltip="tooltip.temperature"
-      />
+      <input type="range" id="temperature" name="temperature" min="0" max="1" step=".01" v-model="temperatureValue"
+        v-tooltip="tooltip.temperature" />
 
       <label for="top_P">Top P: {{ topP }}</label>
-      <input
-        type="range"
-        id="top_P"
-        name="top_P"
-        min="0"
-        max="1"
-        step=".01"
-        v-model="topP"
-        v-tooltip="tooltip.top_p"
-      />
+      <input type="range" id="top_P" name="top_P" min="0" max="1" step=".01" v-model="topP" v-tooltip="tooltip.top_p" />
 
       <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
-      <input
-        type="range"
-        id="max_tokens"
-        name="max_tokens"
-        min="0"
-        max="2048"
-        step="5"
-        v-model="maxTokens"
-        v-tooltip="tooltip.max_tokens"
-      />
+      <input type="range" id="max_tokens" name="max_tokens" min="0" max="2048" step="5" v-model="maxTokens"
+        v-tooltip="tooltip.max_tokens" />
 
       <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>
       <p class="stop-sequence-note">Add sequence then hit Enter</p>
-      <textarea
-        id="stop_sequences"
-        name="stop_sequences"
-        placeholder="i.e., a . or \n"
-        rows="4"
-        cols="20"
-        @keyup="checkKey"
-        v-tooltip="tooltip.stop_sequence"
-      >
-      </textarea>
+      <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
+        @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
+                                </textarea>
 
       <label for="start_text">Inject start text</label>
-      <textarea
-        name="start_text"
-        id="start_text"
-        cols="20"
-        rows="2"
-        v-tooltip="tooltip.start_text"
-      >
-      </textarea>
+      <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text">
+                                </textarea>
     </div>
   </div>
 </template>
@@ -122,14 +72,13 @@ import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
-const myAPIKey = localStorage.getItem("ai-key");
-console.log(myAPIKey);
+let myAPIKey = localStorage.getItem("ai-key");
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append(
   "Authorization",
-  `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+  `Bearer ${myAPIKey}`
 );
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
@@ -224,16 +173,19 @@ const starterText = () => {
 
 const addAPIKey = () => {
   localStorage.setItem("ai-key", apiKey.value);
-  console.log("In setstorage", apiKey);
-};
-
+  myAPIKey = apiKey.value;
+  myHeaders.append(
+    "Authorization",
+    `Bearer ${myAPIKey}`
+  );
+  document.querySelector(".api-input").value = "";
+}
 /**
  * @Description - Remove the API key
  */
 
 const clearAPIKey = () => {
   localStorage.removeItem("ai-key");
-  console.log("In removestorage");
 };
 </script>
 
@@ -333,6 +285,7 @@ select {
   z-index: 1;
   outline: none;
 }
+
 select::-ms-expand {
   display: none;
 }
@@ -354,10 +307,12 @@ select::-ms-expand {
   background-color: #fff;
   background-image: linear-gradient(to top, #f9f9f9, #ac51b5 33%);
 }
+
 .select select,
 .select::after {
   grid-area: select;
 }
+
 .select:not(.select--multiple)::after {
   content: "";
   justify-self: end;
@@ -368,7 +323,7 @@ select::-ms-expand {
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
-select:focus + .focus {
+select:focus+.focus {
   position: absolute;
   top: -1px;
   left: -1px;
@@ -394,6 +349,7 @@ select[multiple] {
    * Not supported crossbrowser
    */
 }
+
 select[multiple] option {
   white-space: normal;
   outline-color: var(--select-focus);
@@ -410,9 +366,10 @@ label {
   font-weight: 500;
 }
 
-.select + label {
+.select+label {
   margin-top: 2rem;
 }
+
 /* === End Select Option Input stylings ===== */
 
 /* ========= Range Input stylings ========== */
@@ -423,9 +380,11 @@ input[type="range"] {
   width: 100%;
   max-width: 200px;
 }
+
 input[type="range"]:focus {
   outline: none;
 }
+
 input[type="range"]::-webkit-slider-runnable-track {
   width: 100%;
   height: 12.8px;
@@ -435,6 +394,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   border-radius: 25px;
   border: 0px solid #000101;
 }
+
 input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
   border: 0px solid #000000;
@@ -446,9 +406,11 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   margin-top: -3.6px;
 }
+
 input[type="range"]:focus::-webkit-slider-runnable-track {
   background: #ac51b5;
 }
+
 input[type="range"]::-moz-range-track {
   width: 100%;
   height: 12.8px;
@@ -458,6 +420,7 @@ input[type="range"]::-moz-range-track {
   border-radius: 25px;
   border: 0px solid #000101;
 }
+
 input[type="range"]::-moz-range-thumb {
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
   border: 0px solid #000000;
@@ -467,6 +430,7 @@ input[type="range"]::-moz-range-thumb {
   background: #65001c;
   cursor: pointer;
 }
+
 input[type="range"]::-ms-track {
   width: 100%;
   height: 12.8px;
@@ -476,18 +440,21 @@ input[type="range"]::-ms-track {
   border-width: 39px 0;
   color: transparent;
 }
+
 input[type="range"]::-ms-fill-lower {
   background: #ac51b5;
   border: 0px solid #000101;
   border-radius: 50px;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 }
+
 input[type="range"]::-ms-fill-upper {
   background: #ac51b5;
   border: 0px solid #000101;
   border-radius: 50px;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 }
+
 input[type="range"]::-ms-thumb {
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
   border: 0px solid #000000;
@@ -497,9 +464,11 @@ input[type="range"]::-ms-thumb {
   background: #65001c;
   cursor: pointer;
 }
+
 input[type="range"]:focus::-ms-fill-lower {
   background: #ac51b5;
 }
+
 input[type="range"]:focus::-ms-fill-upper {
   background: #ac51b5;
 }
@@ -510,6 +479,7 @@ input[type="range"]:focus::-ms-fill-upper {
   25% {
     transform: translateX(5px);
   }
+
   50% {
     transform: translateX(-5px);
   }
@@ -599,11 +569,9 @@ button svg {
   content: "";
   position: absolute;
   width: 100%;
-  background-image: linear-gradient(
-    180deg,
-    rgb(0, 183, 255),
-    rgb(255, 48, 255)
-  );
+  background-image: linear-gradient(180deg,
+      rgb(0, 183, 255),
+      rgb(255, 48, 255));
   height: 130%;
   animation: rotBGimg 3s linear infinite;
   transition: all 0.2s linear;
@@ -623,6 +591,7 @@ button svg {
   justify-content: end;
   max-width: 85vw;
 }
+
 .btn {
   display: flex;
   justify-content: center;
@@ -637,13 +606,11 @@ button svg {
   animation: gradient_301 5s ease infinite;
   border: double 4px transparent;
   background-image: linear-gradient(#212121, #212121),
-    linear-gradient(
-      137.48deg,
+    linear-gradient(137.48deg,
       #ffdb3b 10%,
       #fe53bb 45%,
       #8f51ea 67%,
-      #0044ff 87%
-    );
+      #0044ff 87%);
   background-origin: border-box;
   background-clip: content-box, border-box;
 }
@@ -796,6 +763,4 @@ strong {
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
-
-
 </style>
