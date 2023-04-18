@@ -58,11 +58,11 @@
       <p class="stop-sequence-note">Add sequence then hit Enter</p>
       <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
         @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
-                                </textarea>
+                                                                </textarea>
 
       <label for="start_text">Inject start text</label>
       <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text">
-                                </textarea>
+                                    </textarea>
     </div>
   </div>
 </template>
@@ -70,9 +70,25 @@
 <script setup>
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
+import { useEncryptKey } from "@/modules/useSubtleCrypto.js";
+
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
 let myAPIKey = localStorage.getItem("ai-key");
+
+// encrypt api key
+const { encryptedKey } = useEncryptKey(myAPIKey);
+console.log(encryptedKey);
+
+/* const encryptMyKey = async () => {
+  const encryptedAPIKey = await encryptKey(myAPIKey);
+  console.log(encryptedAPIKey);
+  return encryptedAPIKey;
+}
+
+const encryptedKey = encryptMyKey();
+console.log(encryptedKey); */
+
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");

@@ -1,37 +1,38 @@
+import { ref } from "vue";
+
 /*
   Store the calculated ciphertext here, so we can decrypt the message later.
   */
 let ciphertext;
+let encryptedKey = ref(Uint8Array);
 
 /**
   @Description - Fetch the contents of the localStorage ai-key, and encode it
   in a form we can use for the encrypt operation.
   @return {UTF-8 encoded string}
   */
-function getMessageEncoding() {
-  const messageBox = document.querySelector(".api-input");
-  let message = messageBox.value;
+function getMessageEncoding(storedAPIKey) {
   let enc = new TextEncoder();
-  return enc.encode(message);
+  return enc.encode(storedAPIKey);
 }
 
 /** 
   @Description - Encrypt the localstorage API key
-  @params - {object} - keyPair object. Uses the keyPair.public.key property
-  @returns - {encoded text} -
+  @params - {object} - keyPair object. Uses the keyPair.publicKey property
+  @returns - {encrypted text} -
   */
-async function encryptMessage(key) {
-  let encoded = getMessageEncoding();
+async function encryptMessage(storedAPIKey, encryptionKey) {
+  let encodedKey = getMessageEncoding(storedAPIKey);
   ciphertext = await window.crypto.subtle.encrypt(
     {
       name: "RSA-OAEP",
     },
-    key,
-    encoded
+    encryptionKey,
+    encodedKey
   );
 
-  console.log(ciphertext);
-  return ciphertext;
+  let buffer = new Uint8Array(ciphertext, 0, 5);
+  return buffer;
 }
 
 /** 
@@ -58,12 +59,13 @@ async function decryptMessage(key) {
 
 /**
  * @Description - generate an encryption key for SubtleCrypto API
- *  @Return - {object} - Returns values keyPair.publicKey(used with encryptMessage) &
- *            keypair.privateKey(used with decryptMessage)
+ * @Calls - encryptMessage() with the generated keyPair.publicKey property value
+ *
  */
 
-async function generateKey() {
-  await window.crypto.subtle
+export function useEncryptKey(storedAPIKey) {
+  // First generate a keypair
+  window.crypto.subtle
     .generateKey(
       {
         name: "RSA-OAEP",
@@ -74,9 +76,13 @@ async function generateKey() {
       true,
       ["encrypt", "decrypt"]
     )
-    .then((keyPair) => {
-      return keyPair;
+    .then(async (keyPair) => {
+      // call encryptMessage() w/keypair
+      encryptedKey.value = await encryptMessage(
+        storedAPIKey,
+        keyPair.publicKey
+      );
+      console.log(encryptedKey);
     });
+  return { encryptedKey };
 }
-
-export { encryptMessage, decryptMessage, generateKey };
