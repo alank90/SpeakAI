@@ -58,11 +58,11 @@
       <p class="stop-sequence-note">Add sequence then hit Enter</p>
       <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
         @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
-                                                                                    </textarea>
+                                                                                            </textarea>
 
       <label for="start_text">Inject start text</label>
       <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text">
-                                                        </textarea>
+                                                                </textarea>
     </div>
   </div>
 </template>
@@ -70,11 +70,11 @@
 <script setup>
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
-import { encryptString, decryptString } from "@/modules/useSubtleCrypto.js";
+import { useSubtleCrypto } from "@/modules/useSubtleCrypto.js";
 
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
-
+const { decryptString, encryptString } = useSubtleCrypto();
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
@@ -109,12 +109,13 @@ const askAi = async () => {
   btnText.value = "Thinking...🤔";
 
   // Let's fetch ai-key from localstorage and decrypt it
-  let encryptedKey = localStorage.getItem("ai-key");
-  const { decryptedText } = decryptString(encryptedKey);
+  let encryptedString = localStorage.getItem("ai-key");
+  let decryptedString = decryptString(encryptedString);
+  console.log(decryptedString.value);
   // Append new headers onto myHeaders
   myHeaders.append(
     "Authorization",
-    `Bearer ${decryptedText.value}`
+    `Bearer ${decryptedString.value}`
   );
 
 
@@ -180,9 +181,9 @@ const starterText = () => {
 
 const addAPIKey = () => {
   // Generate a key pair and encrypt the api key in localstorage
-  const { encryptedText, encryptionKeyPair } = encryptString(apiKey.value);
+  let encryptedText = encryptString(apiKey.value)
 
-  console.log(encryptedText.value, encryptionKeyPair.value);
+  console.log(encryptedText.value);
   localStorage.setItem("ai-key", encryptedText);
 
   document.querySelector(".api-input").value = "";
