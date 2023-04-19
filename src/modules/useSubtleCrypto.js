@@ -1,10 +1,10 @@
 import { ref } from "vue";
 
-/*
-  Store the calculated ciphertext here, so we can decrypt the message later.
-  */
+/* =========== Variables ============ */
 let ciphertext;
-let encryptedKey = ref(Uint8Array);
+let encryptedText = ref(null);
+let encryptionKeyPair = ref(null);
+let decryptedText = ref(null);
 
 /**
   @Description - Fetch the contents of the localStorage ai-key, and encode it
@@ -18,21 +18,27 @@ function getMessageEncoding(storedAPIKey) {
 
 /** 
   @Description - Encrypt the localstorage API key
-  @params - {object} - keyPair object. Uses the keyPair.publicKey property
+  @params - {objects} - keyPair object and unencrypted API key. Uses the keyPair.publicKey property
   @returns - {encrypted text} -
   */
-async function encryptMessage(storedAPIKey, encryptionKey) {
-  let encodedKey = getMessageEncoding(storedAPIKey);
+async function encryptionFunction(storedAPIKey, encryptionKey) {
+  console.log("Keypair is: ", encryptionKey, storedAPIKey);
+
+  let encodedString = getMessageEncoding(storedAPIKey);
+  console.log(encodedString);
   ciphertext = await window.crypto.subtle.encrypt(
     {
       name: "RSA-OAEP",
     },
-    encryptionKey,
-    encodedKey
+    encryptionKey.publicKey,
+    encodedString
   );
+  console.log(ciphertext);
 
-  let buffer = new Uint8Array(ciphertext, 0, 5);
-  return buffer;
+  return ciphertext;
+
+  /* let buffer = new Uint8Array(ciphertext, 0, 5);
+  return buffer; */
 }
 
 /** 
@@ -41,29 +47,29 @@ async function encryptMessage(storedAPIKey, encryptionKey) {
   @return - {string}- decrypted localStorage API key
   */
 
-async function decryptMessage(key) {
+export async function decryptString(keyPair) {
   ciphertext = localStorage.getItem("ai-key");
 
   let decrypted = await window.crypto.subtle.decrypt(
     {
       name: "RSA-OAEP",
     },
-    key,
+    keyPair,
     ciphertext
   );
 
   let dec = new TextDecoder();
-  const decryptedValue = dec.decode(decrypted);
-  return decryptedValue;
+  decryptedText.value = dec.decode(decrypted);
+  return decryptedText.value;
 }
 
 /**
  * @Description - generate an encryption key for SubtleCrypto API
- * @Calls - encryptMessage() with the generated keyPair.publicKey property value
+ * @Calls - encryptionFunction() with the generated keyPair.publicKey property value
  *
  */
 
-export function useEncryptKey(storedAPIKey) {
+export function encryptString(storedAPIKey) {
   // First generate a keypair
   window.crypto.subtle
     .generateKey(
@@ -77,12 +83,12 @@ export function useEncryptKey(storedAPIKey) {
       ["encrypt", "decrypt"]
     )
     .then(async (keyPair) => {
-      // call encryptMessage() w/keypair
-      encryptedKey.value = await encryptMessage(
-        storedAPIKey,
-        keyPair.publicKey
-      );
-      console.log(encryptedKey);
+      // Store encryption key
+      encryptionKeyPair.value = keyPair;
+      // call encryptionFunction() w/keypair & unencrypted API key
+      encryptedText.value = await encryptionFunction(storedAPIKey, keyPair);
+
+      //console.log(encryptedText.value);
     });
-  return { encryptedKey };
+  return { encryptedText, encryptionKeyPair };
 }
