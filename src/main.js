@@ -3,10 +3,9 @@ import App from "./App.vue";
 import router from "./router/index.js";
 import FloatingVue from "floating-vue";
 
-createApp(App).use(router).use(FloatingVue).mount("#app");
-
 import "floating-vue/dist/style.css";
 import "@/assets/css/main.css";
+
 // Floating Vue options
 FloatingVue.options.themes = {
   tooltip: {
@@ -19,9 +18,11 @@ FloatingVue.options.themes = {
     // Delay (ms)
     delay: {
       show: 200,
-      hide: 5,
+      hide: 500,
     },
   },
 };
 
 FloatingVue.options.themes.tooltip.disabled = window.innerWidth <= 768;
+
+createApp(App).use(router).use(FloatingVue).mount("#app");

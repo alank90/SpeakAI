@@ -58,11 +58,11 @@
       <p class="stop-sequence-note">Add sequence then hit Enter</p>
       <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
         @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
-                                                                                            </textarea>
+                                                                                                </textarea>
 
       <label for="start_text">Inject start text</label>
       <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text">
-                                                                </textarea>
+                                                                    </textarea>
     </div>
   </div>
 </template>
@@ -74,7 +74,9 @@ import { useSubtleCrypto } from "@/modules/useSubtleCrypto.js";
 
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
+// Destructure the encrypt & decrypt methods for use in component
 const { decryptString, encryptString } = useSubtleCrypto();
+
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);

@@ -1,45 +1,44 @@
-import { ref } from "vue";
-
 /**
  * @Description - Vue composable function to encrypt/decrypt
  *  api key
+ * @Calledby - Home.vue
  *
  */
 
 export function useSubtleCrypto() {
   /* =========== Variables ============ */
-  let ciphertext = ref(null);
-  let encryptedText = ref(null);
-  let decryptedText = ref(null);
+  let ciphertext = null;
+  let encryptedText = null;
+  let decryptedText = null;
 
   /**
-  @Description - Fetch the contents of the localStorage ai-key, and encode it
-  in a form we can use for the encrypt operation.
+  @Description - Takes the data and converts it to a stream of UTF-8 bytes
+  @params - { string } - API string
   @return {UTF-8 encoded string}
   */
-  function getMessageEncoding(storedAPIKey) {
+  function getMessageEncoding(data) {
     let enc = new TextEncoder();
-    return enc.encode(storedAPIKey);
+    return enc.encode(data);
   }
 
   /** 
   @Description - Encrypt the localstorage API key
-  @params - {objects} - keyPair object and unencrypted API key. Uses the keyPair.publicKey property
-  @returns - {encrypted text} -
+  @params - {string, CryptoKey} - String data and the key to be used for encryption
+  @returns - {A Promise that fulfills with an ArrayBuffer containing the "ciphertext".}
   */
-  async function encryptionFunction(storedAPIKey, encryptionKey) {
-    console.log("Keypair is: ", encryptionKey, storedAPIKey);
+  async function encryptionFunction(data, encryptionKeyPair) {
+    // console.log("Keypair is: ", encryptionKeyPair, data);
 
-    let encodedString = getMessageEncoding(storedAPIKey);
-    console.log(encodedString);
-    ciphertext.value = await window.crypto.subtle.encrypt(
+    let encodedString = getMessageEncoding(data);
+    // console.log(encodedString);
+    ciphertext = await window.crypto.subtle.encrypt(
       {
         name: "RSA-OAEP",
       },
-      encryptionKey.publicKey,
+      encryptionKeyPair.publicKey,
       encodedString
     );
-    console.log(ciphertext);
+    //console.log(ciphertext);
 
     return ciphertext;
 
@@ -48,55 +47,54 @@ export function useSubtleCrypto() {
   }
 
   /** 
-  @Description - Fetch the ciphertext and decrypt it.
-  @params - {object} - passed the property keypair.privateKey
+  @Description - Fetch the ciphertext & keypair from localStorage, then decrypt it.
   @return - {string}- decrypted localStorage API key
   */
 
   async function decryptString() {
-    ciphertext.value = localStorage.getItem("ai-key");
+    let data = localStorage.getItem("ai-key");
     let keyPair = localStorage.getItem("keyPair");
 
-    decryptedText.value = await window.crypto.subtle.decrypt(
+    decryptedText = await window.crypto.subtle.decrypt(
       {
         name: "RSA-OAEP",
       },
       keyPair,
-      ciphertext
+      data
     );
 
     let dec = new TextDecoder();
-    decryptedText.value = dec.decode(decryptedText.value);
-    return decryptedText.value;
+    decryptedText = dec.decode(decryptedText);
+    return decryptedText;
   }
 
   /**
-   * @Description - generate an encryption key for SubtleCrypto API
+   * @Description - generate an encryption key and encrypt the data
+   * @params - {string} - The unencrypted API key
    * @Calls - encryptionFunction() with the generated keyPair.publicKey property value
+   * @returns - An encrypted string and stores key in localStorage
    *
    */
 
-  function encryptString(storedAPIKey) {
+  async function encryptString(data) {
     // First generate a keypair
-    window.crypto.subtle
-      .generateKey(
-        {
-          name: "RSA-OAEP",
-          modulusLength: 2048,
-          publicExponent: new Uint8Array([1, 0, 1]),
-          hash: "SHA-256",
-        },
-        true,
-        ["encrypt", "decrypt"]
-      )
-      .then(async (keyPair) => {
-        // Store encryption key
-        localStorage.setItem("keyPair", keyPair);
+    const keyPair = await window.crypto.subtle.generateKey(
+      {
+        name: "RSA-OAEP",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt", "decrypt"]
+    );
 
-        // call encryptionFunction() w/keypair & unencrypted API key
-        encryptedText.value = await encryptionFunction(storedAPIKey, keyPair);
-        return encryptedText.value;
-      });
+    // Store encryption key
+    localStorage.setItem("keyPair", keyPair);
+
+    // call encryptionFunction() w/keypair & unencrypted API string
+    encryptedText = await encryptionFunction(data, keyPair);
+    return encryptedText;
   }
 
   return { encryptString, decryptString };
