@@ -113,8 +113,7 @@ const askAi = async () => {
   // Let's fetch ai-key & key from localstorage and decrypt it
   let encryptedString = localStorage.getItem("ai-key");
   let keyPair = localStorage.getItem("keyPair");
-  /* console.log(keyPair.privateKey);
-  console.log(encryptedString); */
+
   let decryptedString = await decryptString(encryptedString, keyPair);
   console.log(decryptedString);
   // Append new headers onto myHeaders
@@ -188,18 +187,17 @@ const starterText = () => {
 
 const addAPIKey = async () => {
   // Generate a key pair and encrypt the openAI API key  in localstorage
-  let encryptedText = await encryptString(apiKey.value)
-  console.log(encryptedText.key);
-  console.log(encryptedText.str);
+  const { encryptedText, keyPair } = await encryptString(apiKey.value);
+  console.log(keyPair);
+  console.log(encryptedText);
 
   // Store encrypted API string & the encryption key
-  localStorage.setItem("ai-key", encryptedText.str);
-  localStorage.setItem("keyPair", encryptedText.key);
+  localStorage.setItem("ai-key", encryptedText);
+  localStorage.setItem("keyPair", JSON.stringify(keyPair));
 
   let test = localStorage.getItem("keyPair");
-  console.log(Object.keys(encryptedText.key));
-  console.log(Object.keys(test));
-
+  console.log("Test encrytion key", JSON.parse(test));
+  console.log(encryptedText);
   document.querySelector(".api-input").value = "";
 }
 

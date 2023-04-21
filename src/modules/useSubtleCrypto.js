@@ -8,7 +8,7 @@
 export function useSubtleCrypto() {
   /* =========== Variables ============ */
   let ciphertext = null;
-  let encryptedText = {};
+  let encryptedText = null;
   let decryptedText = null;
 
   /**
@@ -49,13 +49,14 @@ export function useSubtleCrypto() {
   */
 
   async function decryptString(data, key) {
+    key = JSON.parse(key);
     console.log("Keypair is: ", key);
 
     decryptedText = await window.crypto.subtle.decrypt(
       {
         name: "RSA-OAEP",
       },
-      key,
+      key.privateKey,
       data
     );
 
@@ -85,11 +86,9 @@ export function useSubtleCrypto() {
       ["encrypt", "decrypt"]
     );
 
-    encryptedText.key = keyPair;
-
     // call encryptionFunction() w/keypair & unencrypted API string
-    encryptedText.str = await encryptionFunction(data, encryptedText.key);
-    return encryptedText;
+    encryptedText = await encryptionFunction(data, keyPair);
+    return { encryptedText, keyPair };
   }
 
   return { encryptString, decryptString };
