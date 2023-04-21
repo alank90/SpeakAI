@@ -8,7 +8,7 @@
 export function useSubtleCrypto() {
   /* =========== Variables ============ */
   let ciphertext = null;
-  let encryptedText = null;
+  let encryptedText = {};
   let decryptedText = null;
 
   /**
@@ -26,19 +26,16 @@ export function useSubtleCrypto() {
   @params - {string, CryptoKey} - String data and the key to be used for encryption
   @returns - {A Promise that fulfills with an ArrayBuffer containing the "ciphertext".}
   */
-  async function encryptionFunction(data, encryptionKeyPair) {
-    // console.log("Keypair is: ", encryptionKeyPair, data);
-
+  async function encryptionFunction(data, key) {
     let encodedString = getMessageEncoding(data);
     // console.log(encodedString);
     ciphertext = await window.crypto.subtle.encrypt(
       {
         name: "RSA-OAEP",
       },
-      encryptionKeyPair.publicKey,
+      key.publicKey,
       encodedString
     );
-    //console.log(ciphertext);
 
     return ciphertext;
 
@@ -51,15 +48,14 @@ export function useSubtleCrypto() {
   @return - {string}- decrypted localStorage API key
   */
 
-  async function decryptString() {
-    let data = localStorage.getItem("ai-key");
-    let keyPair = localStorage.getItem("keyPair");
+  async function decryptString(data, key) {
+    console.log("Keypair is: ", key);
 
     decryptedText = await window.crypto.subtle.decrypt(
       {
         name: "RSA-OAEP",
       },
-      keyPair,
+      key,
       data
     );
 
@@ -89,11 +85,10 @@ export function useSubtleCrypto() {
       ["encrypt", "decrypt"]
     );
 
-    // Store encryption key
-    localStorage.setItem("keyPair", keyPair);
+    encryptedText.key = keyPair;
 
     // call encryptionFunction() w/keypair & unencrypted API string
-    encryptedText = await encryptionFunction(data, keyPair);
+    encryptedText.str = await encryptionFunction(data, encryptedText.key);
     return encryptedText;
   }
 

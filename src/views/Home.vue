@@ -75,7 +75,7 @@ import { useSubtleCrypto } from "@/modules/useSubtleCrypto.js";
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
 // Destructure the encrypt & decrypt methods for use in component
-const { decryptString, encryptString } = useSubtleCrypto();
+const { encryptString, decryptString } = useSubtleCrypto();
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
@@ -110,14 +110,17 @@ const askAi = async () => {
   };
   btnText.value = "Thinking...🤔";
 
-  // Let's fetch ai-key from localstorage and decrypt it
+  // Let's fetch ai-key & key from localstorage and decrypt it
   let encryptedString = localStorage.getItem("ai-key");
-  let decryptedString = decryptString(encryptedString);
-  console.log(decryptedString.value);
+  let keyPair = localStorage.getItem("keyPair");
+  /* console.log(keyPair.privateKey);
+  console.log(encryptedString); */
+  let decryptedString = await decryptString(encryptedString, keyPair);
+  console.log(decryptedString);
   // Append new headers onto myHeaders
   myHeaders.append(
     "Authorization",
-    `Bearer ${decryptedString.value}`
+    `Bearer ${decryptedString}`
   );
 
 
@@ -179,14 +182,23 @@ const starterText = () => {
 
 /**
  * @Description - Event listener to store API key in localstorage
+ * @Calls - { Function } - encryptString() which returns an  {object} w
+ *  encrypted API string and the encryption key as properties.
  */
 
-const addAPIKey = () => {
-  // Generate a key pair and encrypt the api key in localstorage
-  let encryptedText = encryptString(apiKey.value)
+const addAPIKey = async () => {
+  // Generate a key pair and encrypt the openAI API key  in localstorage
+  let encryptedText = await encryptString(apiKey.value)
+  console.log(encryptedText.key);
+  console.log(encryptedText.str);
 
-  console.log(encryptedText.value);
-  localStorage.setItem("ai-key", encryptedText);
+  // Store encrypted API string & the encryption key
+  localStorage.setItem("ai-key", encryptedText.str);
+  localStorage.setItem("keyPair", encryptedText.key);
+
+  let test = localStorage.getItem("keyPair");
+  console.log(Object.keys(encryptedText.key));
+  console.log(Object.keys(test));
 
   document.querySelector(".api-input").value = "";
 }
