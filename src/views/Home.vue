@@ -71,11 +71,13 @@
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 import { useSubtleCrypto } from "@/modules/useSubtleCrypto.js";
+import { useIndexedDBStorage } from "@/modules/useIndexedDBStorage";
 
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
 // Destructure the encrypt & decrypt methods for use in component
 const { encryptString, decryptString } = useSubtleCrypto();
+const { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } = useIndexedDBStorage();
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
@@ -110,12 +112,16 @@ const askAi = async () => {
   };
   btnText.value = "Thinking...🤔";
 
-  // Let's fetch ai-key & key from localstorage and decrypt it
-  let encryptedString = localStorage.getItem("ai-key");
-  let keyPair = localStorage.getItem("keyPair");
+  // Let's fetch ai-key & key from indexedDB db and decrypt it
+  const db = await getDBHandle();
+  let dbItems = await getDBItems(db);
+  let encryptedString = dbItems[0];
+  let keyPair = dbItems[1];
 
+  // Decrypt the string. 
   let decryptedString = await decryptString(encryptedString, keyPair);
   console.log(decryptedString);
+
   // Append new headers onto myHeaders
   myHeaders.append(
     "Authorization",
@@ -191,13 +197,13 @@ const addAPIKey = async () => {
   console.log(keyPair);
   console.log(encryptedText);
 
-  // Store encrypted API string & the encryption key
-  localStorage.setItem("ai-key", encryptedText);
-  localStorage.setItem("keyPair", JSON.stringify(keyPair));
+  // Create the indexDB database
+  const db = await createDB();
 
-  let test = localStorage.getItem("keyPair");
-  console.log("Test encrytion key", JSON.parse(test));
-  console.log(encryptedText);
+  // Store the data in the DB.
+  const { textValue, keyValue } = await addDBEntry(db, encryptedText, keyPair);
+  console.log(textValue, keyValue);
+  
   document.querySelector(".api-input").value = "";
 }
 
@@ -205,8 +211,9 @@ const addAPIKey = async () => {
  * @Description - Remove the API key
  */
 
-const clearAPIKey = () => {
-  localStorage.removeItem("ai-key");
+const clearAPIKey = async () => {
+  await removeDB(dbName);
+  console.log("API key wiped!");
 };
 </script>
 

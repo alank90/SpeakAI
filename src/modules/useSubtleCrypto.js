@@ -38,9 +38,6 @@ export function useSubtleCrypto() {
     );
 
     return ciphertext;
-
-    /* let buffer = new Uint8Array(ciphertext, 0, 5);
-  return buffer; */
   }
 
   /** 
@@ -49,9 +46,6 @@ export function useSubtleCrypto() {
   */
 
   async function decryptString(data, key) {
-    key = JSON.parse(key);
-    console.log("Keypair is: ", key);
-
     decryptedText = await window.crypto.subtle.decrypt(
       {
         name: "RSA-OAEP",
