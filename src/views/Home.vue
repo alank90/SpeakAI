@@ -18,7 +18,8 @@
       </div>
 
       <div class="card">
-        <pre id="ai_response">{{ aiResponse }}</pre>
+        <div id="ai-query"> {{ aiQuery }}</div>
+        <div id="ai-response"> {{ introText }} {{ aiResponse }}</div>
       </div>
     </div>
 
@@ -85,6 +86,7 @@ myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
 let apiKey = ref("");
 const content = ref("");
+let decryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
 let maxTokens = ref(100);
@@ -92,7 +94,9 @@ let stopSequences = ref([]);
 let theStopSequence = "";
 
 const BTN_TEXT = "Submit 🚀";
-const aiResponse = ref("✅ The answer will be displayed here.");
+const aiQuery = ref("");
+const introText = ref("✅ The answer will be displayed here.")
+const aiResponse = ref("");
 const btnText = ref(BTN_TEXT);
 
 /* ================== Methods =============================== */
@@ -111,25 +115,34 @@ const askAi = async () => {
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
   };
   btnText.value = "Thinking...🤔";
+  // Clear query box
+  introText.value = "";
 
-  // Let's fetch ai-key & key from indexedDB db and decrypt it
-  const db = await getDBHandle();
-  let dbItems = await getDBItems(db);
-  let encryptedString = dbItems[0];
-  let keyPair = dbItems[1];
+  // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
+  if (!decryptedString) {
+    const db = await getDBHandle();
+    let dbItems = await getDBItems(db);
 
-  // Decrypt the string. 
-  let decryptedString = await decryptString(encryptedString, keyPair);
-  console.log(decryptedString);
+    // Check if db retrieval successful
+    if (!dbItems) {
+      console.log("Failed IndexedDB getItems action.");
+      return;
+    }
+    // else, continue
+    let encryptedString = dbItems[0];
+    let keyPair = dbItems[1];
 
-  // Append new headers onto myHeaders
-  myHeaders.append(
-    "Authorization",
-    `Bearer ${decryptedString}`
-  );
+    // Decrypt the string. 
+    decryptedString = await decryptString(encryptedString, keyPair);
 
+    // Append new authorization header onto myHeaders if initial chat request for session.
+    myHeaders.append(
+      "Authorization",
+      `Bearer ${decryptedString}`
+    );
+  } // end !decryptedString if block
 
-  // ====== API call ===========
+  // ============= API call ===============================
   await fetch(openAIURL, {
     method: "POST",
     headers: myHeaders,
@@ -142,8 +155,15 @@ const askAi = async () => {
       return response.json();
     })
     .then((data) => {
-      const insertStarterText = starterText();
-      aiResponse.value = `${insertStarterText} ${data.choices[0].message.content}`;
+      // Add to chat history dialog
+      aiQuery.value =+ `🧑 ${content.value}`;
+      let insertStarterText = starterText();
+
+      aiResponse.value =+ `🤖${data.choices[0].message.content}`;
+
+      // Clear query 
+      content.value = "";
+
     })
     .catch((error) => {
       aiResponse.value =
@@ -157,6 +177,7 @@ const askAi = async () => {
       btnText.value = BTN_TEXT;
     });
 };
+// ----------------- End of askAI() ----------------------------------- //
 
 /**
  * @Description - Called every time character typed in the <textarea>
@@ -182,11 +203,12 @@ const checkKey = (e) => {
 
 const starterText = () => {
   const startText = document.getElementById("start_text").value;
+
   return startText;
 };
 
 /**
- * @Description - Event listener to store API key in localstorage
+ * @Description - Event listener to store API key in indexedDB store.
  * @Calls - { Function } - encryptString() which returns an  {object} w
  *  encrypted API string and the encryption key as properties.
  */
@@ -194,16 +216,13 @@ const starterText = () => {
 const addAPIKey = async () => {
   // Generate a key pair and encrypt the openAI API key  in localstorage
   const { encryptedText, keyPair } = await encryptString(apiKey.value);
-  console.log(keyPair);
-  console.log(encryptedText);
 
   // Create the indexDB database
   const db = await createDB();
 
   // Store the data in the DB.
-  const { textValue, keyValue } = await addDBEntry(db, encryptedText, keyPair);
-  console.log(textValue, keyValue);
-  
+  await addDBEntry(db, encryptedText, keyPair);
+
   document.querySelector(".api-input").value = "";
 }
 
@@ -213,7 +232,7 @@ const addAPIKey = async () => {
 
 const clearAPIKey = async () => {
   await removeDB(dbName);
-  console.log("API key wiped!");
+  alert("API key wiped!");
 };
 </script>
 
@@ -574,23 +593,24 @@ button svg {
   background: #f9f1fd;
   position: relative;
   display: flex;
-  place-content: center;
-  place-items: center;
+  flex-direction: column;
+  align-items: start;
   overflow: hidden;
   border-radius: 16px;
   margin: 32px auto;
-  max-width: 85vw;
+  max-width: 65vw;
+  min-height: 20%;
 }
 
-.card span,
-.card pre {
+#ai-query,
+#ai-response {
   z-index: 1;
   font-size: 1.2rem;
   font-family: var(--letter-font);
   font-weight: 525;
   color: var(--letter-ai-color);
-  white-space: pre-wrap;
   padding: 4px;
+  margin: 4px;
 }
 
 .card::before {

@@ -8,7 +8,7 @@ import { openDB, deleteDB } from "idb";
 export function useIndexedDBStorage() {
   const dbName = "myStorage";
   const storeName = "store1";
-  const version = 1; // initial version number.
+  let version = 1; // initial version number.
 
   // Check if browser supports IndexedDB
   if (!("indexedDB" in window)) {
@@ -41,6 +41,12 @@ export function useIndexedDBStorage() {
    */
 
   async function addDBEntry(db, apiText, encryptionKey) {
+    // Check if store already exists from previous add key action and
+    // if not add the store
+    if (!db.objectStoreNames.contains(storeName)) {
+      db.createObjectStore(storeName);
+    }
+
     const tx = db.transaction(storeName, "readwrite");
     const store = await tx.objectStore(storeName);
 
@@ -61,6 +67,15 @@ export function useIndexedDBStorage() {
    * @returns - the the IndexedDB items stored in browser
    */
   async function getDBItems(db) {
+    // First check if store exists
+    if (!db.objectStoreNames.contains(storeName)) {
+      alert(
+        "It doesn't look like you have an API key registered. Please check and add one."
+      );
+
+      return null;
+    }
+
     // Get all values stored in IndexedDB
     const dbItems = await db
       .transaction(storeName)
