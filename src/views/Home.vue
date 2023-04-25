@@ -18,8 +18,7 @@
       </div>
 
       <div class="card">
-        <div id="ai-query"> {{ aiQuery }}</div>
-        <div id="ai-response"> {{ introText }} {{ aiResponse }}</div>
+        <div id="ai-conversation"> {{ introText }} {{ aiConversation }} </div>
       </div>
     </div>
 
@@ -59,11 +58,10 @@
       <p class="stop-sequence-note">Add sequence then hit Enter</p>
       <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
         @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
-                                                                                                </textarea>
+      </textarea>
 
       <label for="start_text">Inject start text</label>
-      <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text">
-                                                                    </textarea>
+      <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text"></textarea>
     </div>
   </div>
 </template>
@@ -84,6 +82,7 @@ const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
+// ======= Vars ==================== // 
 let apiKey = ref("");
 const content = ref("");
 let decryptedString = null;
@@ -95,8 +94,9 @@ let theStopSequence = "";
 
 const BTN_TEXT = "Submit 🚀";
 const aiQuery = ref("");
-const introText = ref("✅ The answer will be displayed here.")
 const aiResponse = ref("");
+const aiConversation = ref("");
+const introText = ref("✅ The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
 
 /* ================== Methods =============================== */
@@ -125,7 +125,7 @@ const askAi = async () => {
 
     // Check if db retrieval successful
     if (!dbItems) {
-      console.log("Failed IndexedDB getItems action.");
+      alert("Failed IndexedDB getItems action.");
       return;
     }
     // else, continue
@@ -156,14 +156,14 @@ const askAi = async () => {
     })
     .then((data) => {
       // Add to chat history dialog
-      aiQuery.value =+ `🧑 ${content.value}`;
       let insertStarterText = starterText();
 
-      aiResponse.value =+ `🤖${data.choices[0].message.content}`;
-
+      aiQuery.value = `🧑 ${content.value}`;
+      aiResponse.value = `🤖 ${data.choices[0].message.content}`;
+      aiConversation.value = insertStarterText ? `${aiQuery.value} \n ${insertStarterText} \n ${aiResponse.value} \n ${aiConversation.value} \n` :
+        `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
       // Clear query 
       content.value = "";
-
     })
     .catch((error) => {
       aiResponse.value =
@@ -224,7 +224,7 @@ const addAPIKey = async () => {
   await addDBEntry(db, encryptedText, keyPair);
 
   document.querySelector(".api-input").value = "";
-}
+};
 
 /**
  * @Description - Remove the API key
@@ -602,8 +602,7 @@ button svg {
   min-height: 20%;
 }
 
-#ai-query,
-#ai-response {
+#ai-conversation {
   z-index: 1;
   font-size: 1.2rem;
   font-family: var(--letter-font);
@@ -611,6 +610,8 @@ button svg {
   color: var(--letter-ai-color);
   padding: 4px;
   margin: 4px;
+  white-space: pre-wrap;
+  text-align: start;
 }
 
 .card::before {

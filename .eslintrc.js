@@ -11,6 +11,7 @@ module.exports = {
   plugins: ["vue"],
   rules: {
     "vue/no-multiple-template-root": "off",
+    "semi": [2, "always"],
     "vue/multi-word-component-names": [
       "error",
       {
