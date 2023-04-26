@@ -20,6 +20,8 @@
       <div class="card">
         <div id="ai-conversation"> {{ introText }} {{ aiConversation }} </div>
       </div>
+
+      <button @click="aiConversation = ''" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
     </div>
 
     <div class="chat-options">
@@ -69,14 +71,11 @@
 <script setup>
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
-import { useSubtleCrypto } from "@/modules/useSubtleCrypto.js";
-import { useIndexedDBStorage } from "@/modules/useIndexedDBStorage";
+import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
+import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
 
 
 const openAIURL = "https://api.openai.com/v1/chat/completions";
-// Destructure the encrypt & decrypt methods for use in component
-const { encryptString, decryptString } = useSubtleCrypto();
-const { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } = useIndexedDBStorage();
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
@@ -134,6 +133,7 @@ const askAi = async () => {
 
     // Decrypt the string. 
     decryptedString = await decryptString(encryptedString, keyPair);
+    console.log(decryptedString);
 
     // Append new authorization header onto myHeaders if initial chat request for session.
     myHeaders.append(
@@ -557,6 +557,20 @@ button {
   transition: all 0.2s;
 }
 
+.btn--clear-block {
+  display: inline;
+  width: 100%;
+  max-width: 200px;
+  margin: 3px 0 5px;
+  padding: 0;
+  font-size: 0.9rem;
+  background-color: #ac51b5;
+}
+
+.btn--clear-block:hover {
+  background-color: #ad51b5c4;
+}
+
 .btn--api-key {
   display: inline;
   width: 100%;
@@ -570,6 +584,8 @@ button {
 .btn--api-key:hover {
   background-color: #ad51b5c4;
 }
+
+
 
 #add-key {
   margin-right: 5px;

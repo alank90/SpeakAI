@@ -1,13 +1,12 @@
 <template>
   <nav id="nav-container">
-    <img
-      class="navbar-item-one"
-      src="../assets/images/ai_navbar_image_sm.png"
-      alt="Image of an AI person"
-    />
+    <img class="navbar-item-one" src="../assets/images/ai_navbar_image_sm.png" alt="Image of an AI person" />
 
     <ul class="navbar-item-two">
       <li class="menu-item"><router-link to="/">Home</router-link></li>
+      <li class="menu-item">
+        <router-link to="/dalle">DALL-E</router-link>
+      </li>
       <li class="menu-item"><router-link to="/about">About</router-link></li>
     </ul>
   </nav>
@@ -30,11 +29,12 @@
   border-radius: 50%;
   width: 4rem;
 }
+
 .navbar-item-two {
   display: inline-flex;
 }
 
-.menu-item > a {
+.menu-item>a {
   font-family: var(--letter-font);
   font-size: 1.3rem;
   font-weight: 500;
