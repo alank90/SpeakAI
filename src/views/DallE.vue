@@ -3,34 +3,37 @@
     <div class="container">
         <p class="description">Start with a detailed decription</p>
         <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
-            v-model="content" clear />
-
+            v-model="dalleQuery" clear />
+        <button @click="fetchImages" class="btn--image-query">Query</button>
         <div class="img-container">
-            {{ introText }}
+            {{ introText }} {{ imagesURL }}
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { useFetch } from "@/modules/usefetch.js";
 import { getDBHandle, getDBItems } from "@/modules/indexedDBStorage.js";
 import { decryptString } from "@/modules/subtleCrypto.js";
+import { useFetch } from "@/modules/usefetch.js";
+
 
 /** 
  * @Description - An IIFE to facilitate using async/await in the Vue component
 */
-(async function () {
-    // ========= Vars ========================== //
-    const dalleURL = `https://api.openai.com/v1/images/generations`;
-    const content = ref("");
-    const introText = ref("✅ The images will be displayed here.");
-    let decryptedString = null;
+// ========= Vars ========================== //
+const dalleURL = `https://api.openai.com/v1/images/generations`;
+const dalleQuery = ref("");
+const introText = ref("✅ The images will be displayed here.");
+let decryptedString = null;
 
-    // Create headers
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+// Create headers
+const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
 
+
+// ================ Methods ======================================== //
+const decryptFunction = async () => {
     // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
     if (!decryptedString) {
         const db = await getDBHandle();
@@ -47,19 +50,28 @@ import { decryptString } from "@/modules/subtleCrypto.js";
         // Decrypt the string. 
         decryptedString = await decryptString(encryptedString, keyPair);
 
-        // Append new authorization header onto myHeaders if initial chat request for session.
-        myHeaders.append(
-            "Authorization",
-            `Bearer ${decryptedString}`
-        );
-    } // end !decryptedString if block
+        return decryptedString;
 
+    } // end !decryptedString if block
+};
+/**
+ * @Description - Fetches images from DALL-E service 
+ * @returns - Fetched images from DALL-E endpoint
+ */
+const fetchImages = async () => {
+    decryptedString = await decryptFunction();
+
+    // Append new authorization header onto myHeaders if initial chat request for session.
+    myHeaders.append(
+        "Authorization",
+        `Bearer ${decryptedString}`
+    );
 
     // Fetch scores
     const dalleOptions = {
-        prompt: content.value,
+        prompt: dalleQuery.value,
         n: 1,
-        size: "1024 x 1024"
+        size: '1024x1024'
     };
 
     const fetchOptions = {
@@ -67,11 +79,14 @@ import { decryptString } from "@/modules/subtleCrypto.js";
         headers: myHeaders,
         body: JSON.stringify(dalleOptions),
     };
-    const { data: images, error } = useFetch(dalleURL, fetchOptions);
 
-})();
+    //console.log(`myHeaders -> ${myHeaders} dalleOptions -> ${dalleOptions} fetchOptions -> ${Object.keys(fetchOptions)}`);
+    // ============ Fetch images ==================================================== //
+    const { imagesURL } = useFetch(dalleURL, fetchOptions);
+    console.log(imagesURL);
 
 
+};
 
 </script>
 
@@ -91,10 +106,10 @@ label {
 
 .input {
     width: calc(85% - 20px);
-    height: 32px;
+    max-height: 9%;
     padding: 12px;
     border: none;
-    border-radius: 16px;
+    border-radius: 16px 0 0 16px;
     box-shadow: 2px 2px 7px 0 rgb(0, 0, 0, 0.2);
     outline: none;
     font-size: 1.2rem;
@@ -105,6 +120,24 @@ label {
 .input:invalid {
     animation: justshake 0.3s forwards;
     color: red;
+}
+
+.btn--image-query {
+    max-height: 9%;
+    padding: 12px;
+    border: none;
+    border-radius: 0 16px 16px 0;
+    background-color: #fff;
+    box-shadow: 2px 2px 7px 0 rgb(0, 0, 0, 0.2);
+    outline: none;
+    font-size: 1.3rem;
+    font-weight: 550;
+    font-family: var(--letter-font);
+
+}
+
+.btn--image-query:hover {
+    background-color: #faecfbb7;
 }
 
 .img-container {
