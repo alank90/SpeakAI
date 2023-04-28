@@ -5,10 +5,13 @@
         <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
             v-model="dalleQuery" clear />
         <button @click="fetchImages" class="btn--image-query">Query</button>
-        <div class="img-container">
-            {{ introText }} {{ retrievedImages }}
-            <p v-if="error">{{ error }}</p>
+        <p class="loading" v-if="loading">Retrieving images...</p>
+
+        <div v-if="retrievedImages" class="img-container">
+            <img v-for="(item, index) in retrievedImages.data" :src="item.url" alt="A Picture" :key="index">
+            {{ introText }}
         </div>
+        <p v-if="error">{{ error }}</p>
     </div>
 </template>
 
@@ -20,15 +23,18 @@ import { doFetch, error } from "@/modules/usefetch.js";
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
 let retrievedImages = ref(null);
+let loading = ref(false);
 const introText = ref("✅ The images will be displayed here.");
 
 
 // ============== Methods ======================== //
 // ==== Fetch images ==== //
 const fetchImages = async () => {
-
-    retrievedImages.value = await doFetch(dalleURL, dalleQuery);
-    console.log(retrievedImages.value);
+    retrievedImages.value = null;
+    loading.value = true;
+    retrievedImages.value = await doFetch(dalleURL, dalleQuery.value);
+    loading.value = false;
+    introText.value = "";
 
 };
 </script>
@@ -84,11 +90,21 @@ label {
 }
 
 .img-container {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-around;
+    gap: 5px;
     font-size: 1.2rem;
     font-weight: 550;
     font-family: var(--letter-font);
     color: var(--letter-ai-color);
-    margin-top: 40px;
+    margin: 40px 0;
+}
+
+.loading {
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
 .description {
