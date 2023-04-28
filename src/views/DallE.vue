@@ -6,88 +6,31 @@
             v-model="dalleQuery" clear />
         <button @click="fetchImages" class="btn--image-query">Query</button>
         <div class="img-container">
-            {{ introText }} {{ imagesURL }}
+            {{ introText }} {{ retrievedImages }}
+            <p v-if="error">{{ error }}</p>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { getDBHandle, getDBItems } from "@/modules/indexedDBStorage.js";
-import { decryptString } from "@/modules/subtleCrypto.js";
-import { useFetch } from "@/modules/usefetch.js";
+import { doFetch, error } from "@/modules/usefetch.js";
 
-
-/** 
- * @Description - An IIFE to facilitate using async/await in the Vue component
-*/
 // ========= Vars ========================== //
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
+let retrievedImages = ref(null);
 const introText = ref("✅ The images will be displayed here.");
-let decryptedString = null;
-
-// Create headers
-const myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
 
 
-// ================ Methods ======================================== //
-const decryptFunction = async () => {
-    // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
-    if (!decryptedString) {
-        const db = await getDBHandle();
-        let dbItems = await getDBItems(db);
-
-        // Check if db retrieval successful
-        if (!dbItems) {
-            alert("Failed IndexedDB getItems action.");
-        }
-        // else, continue
-        let encryptedString = dbItems[0];
-        let keyPair = dbItems[1];
-
-        // Decrypt the string. 
-        decryptedString = await decryptString(encryptedString, keyPair);
-
-        return decryptedString;
-
-    } // end !decryptedString if block
-};
-/**
- * @Description - Fetches images from DALL-E service 
- * @returns - Fetched images from DALL-E endpoint
- */
+// ============== Methods ======================== //
+// ==== Fetch images ==== //
 const fetchImages = async () => {
-    decryptedString = await decryptFunction();
 
-    // Append new authorization header onto myHeaders if initial chat request for session.
-    myHeaders.append(
-        "Authorization",
-        `Bearer ${decryptedString}`
-    );
-
-    // Fetch scores
-    const dalleOptions = {
-        prompt: dalleQuery.value,
-        n: 1,
-        size: '1024x1024'
-    };
-
-    const fetchOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify(dalleOptions),
-    };
-
-    //console.log(`myHeaders -> ${myHeaders} dalleOptions -> ${dalleOptions} fetchOptions -> ${Object.keys(fetchOptions)}`);
-    // ============ Fetch images ==================================================== //
-    const { imagesURL } = useFetch(dalleURL, fetchOptions);
-    console.log(imagesURL);
-
+    retrievedImages.value = await doFetch(dalleURL, dalleQuery);
+    console.log(retrievedImages.value);
 
 };
-
 </script>
 
 <style scoped>
