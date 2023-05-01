@@ -35,7 +35,7 @@
 
       <label for="modelt">Model</label>
       <div class="select" v-tooltip="tooltip.model">
-        <select id="model">
+        <select id="model" v-model="chatModel">
           <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
           <option value="text-davinci-003">Text-davinci-003</option>
           <option value="text-curie-001">Text-Curie-001</option>
@@ -84,6 +84,7 @@ myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 // ======= Vars ==================== // 
 let apiKey = ref("");
 const content = ref("");
+let chatModel = ref("gpt-3.5-turbo");
 let decryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
@@ -106,7 +107,7 @@ const btnText = ref(BTN_TEXT);
 const askAi = async () => {
   // Vars
   const fetchOptions = {
-    model: "gpt-3.5-turbo",
+    model: chatModel.value,
     messages: [{ role: "user", content: content.value }],
     temperature: parseFloat(temperatureValue.value),
     top_p: parseFloat(topP.value),

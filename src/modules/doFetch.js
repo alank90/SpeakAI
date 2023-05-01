@@ -2,7 +2,7 @@ import { getDBHandle, getDBItems } from "@/modules/indexedDBStorage.js";
 import { decryptString } from "@/modules/subtleCrypto.js";
 
 /**
- * @Description - Vue  composable function to fetch data
+ * @Description - Javascript module to fetch data
  * @param {string} url
  * @returns {object} - Reactive variables
  * @importedBy - DallE.vue
@@ -39,7 +39,7 @@ const decryptFunction = async () => {
  * @Description - Construct fetch options for DALL-E endpoint
  * @returns - Fetched images from DALL-E endpoint
  */
-const constructFetchOptions = async (query) => {
+const constructFetchOptions = async (optionsForQuery) => {
   decryptedString = await decryptFunction();
 
   // Create headers
@@ -51,9 +51,9 @@ const constructFetchOptions = async (query) => {
 
   // Fetch scores
   const dalleOptions = {
-    prompt: query,
-    n: 3,
-    size: "256x256",
+    prompt: optionsForQuery.value.query,
+    n: parseInt(optionsForQuery.value.n),
+    size: optionsForQuery.value.size,
   };
 
   const options = {
@@ -65,12 +65,12 @@ const constructFetchOptions = async (query) => {
   return options;
 };
 
-async function doFetch(url, query) {
+async function doFetch(url, options) {
   // reset before fetching ..
   imagesURL = null;
   error = null;
 
-  fetchOptions = await constructFetchOptions(query);
+  fetchOptions = await constructFetchOptions(options);
 
   try {
     const res = await fetch(url, fetchOptions);
