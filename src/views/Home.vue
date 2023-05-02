@@ -134,7 +134,6 @@ const askAi = async () => {
 
     // Decrypt the string. 
     decryptedString = await decryptString(encryptedString, keyPair);
-    console.log(decryptedString);
 
     // Append new authorization header onto myHeaders if initial chat request for session.
     myHeaders.append(
@@ -150,12 +149,15 @@ const askAi = async () => {
     body: JSON.stringify(fetchOptions),
   })
     .then((response) => {
-      if (!response.ok) {
+      /* if (!response.ok) {
         throw new Error("Network response was not OK");
-      }
+      } */
       return response.json();
     })
     .then((data) => {
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
       // Add to chat history dialog
       let insertStarterText = starterText();
 
@@ -167,8 +169,8 @@ const askAi = async () => {
       content.value = "";
     })
     .catch((error) => {
-      aiResponse.value =
-        "I'm sorry. There was a problem with your request at this time.";
+      aiConversation.value =
+        `I'm sorry. There was a problem with your request at this time. ${error}`;
       console.error(
         "There has been a problem with your fetch operation:",
         error
