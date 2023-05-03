@@ -13,4 +13,6 @@ export default ref({
     "Stop Sequences are used to make the model stop at a desired point, such as the end of a sentence or a list. Generally, the return key will work well as a Stop Sequence for single line completions.",
   start_text:
     "Text to append after the user's input to format the model for a response",
+  number_of_images: "The number of images requested.",
+  image_size: "Size of images returned.",
 });

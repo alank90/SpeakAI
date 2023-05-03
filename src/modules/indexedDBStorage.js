@@ -1,10 +1,10 @@
 /**
- * @Description - Module of IndexedDb actions to 
+ * @Description - Module of IndexedDb actions to
  *  perform on an IndexedDB db(i.e.,CRUD) so we can encrypt and
  *  store API string w/key in IndexedDB storage.
  * @Calledby - Home.vue
  */
-import { openDB, deleteDB } from "idb";
+import { openDB } from "idb";
 
 const dbName = "myStorage";
 const storeName = "store1";
@@ -55,7 +55,7 @@ async function addDBEntry(db, apiText, encryptionKey) {
   const keyValue = await store.put(encryptionKey, key);
 
   await tx.done;
-  console.log("Added item to indexDB storage!");
+  alert("API key registered on this browser! You need to refresh browser now.");
 
   return { textValue, keyValue };
 }
@@ -99,8 +99,19 @@ async function getDBHandle() {
  * @param {*} dbName - db to delete
  */
 async function removeDB(dbName) {
-  await deleteDB(dbName);
-  console.log(`indexedDB ${dbName} was deleted!`);
+  const DBDeleteRequest = window.indexedDB.deleteDatabase(dbName);
+
+  DBDeleteRequest.onsuccess = (event) => {
+    // event,result will be undefined if delete successful
+    if (event.result === undefined) {
+      alert("Your API key was deleted successfully! Refresh your browser now.");
+    }
+
+    DBDeleteRequest.onerror = (event) => {
+      console.log(event);
+      alert("Error deleting API key. Try closing browser and trying again.");
+    };
+  };
 }
 
 export { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName };

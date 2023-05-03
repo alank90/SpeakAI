@@ -2,7 +2,7 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <input type="text" class="input" placeholder="Ask me about ...🌽" v-model="content" clear />
+      <input type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content" clear />
 
       <div class="button-block">
         <button type="button" @click="askAi" class="btn">
@@ -79,7 +79,6 @@ const openAIURL = "https://api.openai.com/v1/chat/completions";
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
-//myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
 // ======= Vars ==================== // 
 let apiKey = ref("");
@@ -96,7 +95,7 @@ const BTN_TEXT = "Submit 🚀";
 const aiQuery = ref("");
 const aiResponse = ref("");
 const aiConversation = ref("");
-const introText = ref("✅ The answer will be displayed here.");
+const introText = ref("📖 The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
 
 /* ================== Methods =============================== */
@@ -125,7 +124,7 @@ const askAi = async () => {
 
     // Check if db retrieval successful
     if (!dbItems) {
-      alert("Failed IndexedDB getItems action.");
+      btnText.value = BTN_TEXT;
       return;
     }
     // else, continue
@@ -149,9 +148,6 @@ const askAi = async () => {
     body: JSON.stringify(fetchOptions),
   })
     .then((response) => {
-      /* if (!response.ok) {
-        throw new Error("Network response was not OK");
-      } */
       return response.json();
     })
     .then((data) => {
@@ -212,7 +208,7 @@ const starterText = () => {
 
 /**
  * @Description - Event listener to store API key in indexedDB store.
- * @Calls - { Function } - encryptString() which returns an  {object} w
+ * @Calls - { Function } - encryptString() which returns an  {object} w/
  *  encrypted API string and the encryption key as properties.
  */
 
@@ -230,12 +226,12 @@ const addAPIKey = async () => {
 };
 
 /**
- * @Description - Remove the API key
+ * @Description - Remove the API key from IndexDB storage.
  */
 
 const clearAPIKey = async () => {
   await removeDB(dbName);
-  alert("API key wiped!");
+
 };
 </script>
 
@@ -631,6 +627,7 @@ button svg {
   margin: 4px;
   white-space: pre-wrap;
   text-align: start;
+  overflow-y: auto;
 }
 
 .card::before {

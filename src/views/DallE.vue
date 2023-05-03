@@ -16,10 +16,11 @@
 
         <div class="container--options">
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
-            <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate" />
+            <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate"
+                v-tooltip="tooltip.number_of_images" />
 
             <label for="picture-size">Picture Size</label>
-            <div class="select">
+            <div class="select" v-tooltip="tooltip.image_size">
                 <select id="picture-size" v-model="pictureSize">
                     <option value="256x256">256x256</option>
                     <option value="512x512">512x512</option>
@@ -35,6 +36,8 @@
 <script setup>
 import { ref } from "vue";
 import { doFetch } from "@/modules/doFetch.js";
+import tooltip from "@/modules/useTooltip.js";
+
 
 // ========= Vars ========================== //
 const dalleURL = `https://api.openai.com/v1/images/generations`;
