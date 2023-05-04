@@ -1,5 +1,7 @@
 <template>
-    <h1>DALL-E Image Generator</h1>
+    <h1>DALL-E Image Generation</h1>
+    <h2>Given a prompt, the model will generate a new image.</h2>
+
     <div class="container">
         <div class="container--query">
             <p class="description">Start with a detailed decription</p>
@@ -74,7 +76,12 @@ const fetchImages = async () => {
 <style scoped>
 h1 {
     font-family: var(--heading-font);
-    margin-bottom: 64px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.4rem;
+    margin-bottom: 45px;
 }
 
 /* ====== Grid Container ============== */

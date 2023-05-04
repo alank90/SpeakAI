@@ -1,6 +1,6 @@
 <template>
   <app-navbar></app-navbar>
-  <img alt="AI picture" src="./assets/images/ai_image_xs.png" />
+  <img alt="AI picture" src="./assets/images/ai_image_xs.webp" />
   <div class="flow">
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
