@@ -82,6 +82,7 @@ h1 {
 h2 {
     font-size: 1.4rem;
     margin-bottom: 45px;
+    text-align: center;
 }
 
 /* ====== Grid Container ============== */
