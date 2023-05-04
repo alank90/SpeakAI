@@ -55,7 +55,7 @@ async function addDBEntry(db, apiText, encryptionKey) {
   const keyValue = await store.put(encryptionKey, key);
 
   await tx.done;
-  console.log("Added item to indexDB storage!");
+  alert("API key successfully added! Refresh your browser now.");
 
   return { textValue, keyValue };
 }
