@@ -2,7 +2,7 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <input type="text" class="input" placeholder="Ask me about ...🌽" v-model="content" clear />
+      <input type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content" clear />
 
       <div class="button-block">
         <button type="button" @click="askAi" class="btn">
