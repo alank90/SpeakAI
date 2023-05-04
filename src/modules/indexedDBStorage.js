@@ -1,5 +1,5 @@
 /**
- * @Description - Module of IndexedDb actions to 
+ * @Description - Module of IndexedDb actions to
  *  perform on an IndexedDB db(i.e.,CRUD) so we can encrypt and
  *  store API string w/key in IndexedDB storage.
  * @Calledby - Home.vue
@@ -55,7 +55,7 @@ async function addDBEntry(db, apiText, encryptionKey) {
   const keyValue = await store.put(encryptionKey, key);
 
   await tx.done;
-  console.log("Added item to indexDB storage!");
+  alert("Registered API key successfully. Refresh browser now!");
 
   return { textValue, keyValue };
 }

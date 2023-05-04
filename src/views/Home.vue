@@ -125,6 +125,7 @@ const askAi = async () => {
 
     // Check if db retrieval successful
     if (!dbItems) {
+      btnText.value = BTN_TEXT;
       alert("Failed IndexedDB getItems action.");
       return;
     }
@@ -134,7 +135,6 @@ const askAi = async () => {
 
     // Decrypt the string. 
     decryptedString = await decryptString(encryptedString, keyPair);
-    console.log(decryptedString);
 
     // Append new authorization header onto myHeaders if initial chat request for session.
     myHeaders.append(
