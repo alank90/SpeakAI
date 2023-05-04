@@ -4,7 +4,7 @@ import { decryptString } from "@/modules/subtleCrypto.js";
 /**
  * @Description - Javascript module to fetch data
  * @param {string} url
- * @returns {object} - Reactive variables
+ * @returns {object} - Images and error object
  * @importedBy - DallE.vue
  */
 // ======= Variable Declarations ============ //
@@ -14,6 +14,11 @@ let error = null;
 let fetchOptions = null;
 
 // ================ Methods ======================================== //
+/**
+ * @Description - Retrieves encrypted API string from IndexedDB and decrypts
+ *  string. Checks for decrypted string from previous calls.
+ * @returns {string} - Decrypted API string
+ */
 const decryptFunction = async () => {
   // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
   if (!decryptedString) {
@@ -30,9 +35,10 @@ const decryptFunction = async () => {
 
     // Decrypt the string.
     const decryptedString = await decryptString(encryptedString, keyPair);
-
     return decryptedString;
-  } // end !decryptedString if block
+  } else {
+    return decryptedString;
+  }
 };
 
 /**

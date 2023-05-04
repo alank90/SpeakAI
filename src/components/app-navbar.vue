@@ -1,6 +1,6 @@
 <template>
   <nav id="nav-container">
-    <img class="navbar-item-one" src="../assets/images/ai_navbar_image_sm.png" alt="Image of an AI person" />
+    <img class="navbar-item-one" src="../assets/images/ai_navbar_image_sm.webp" alt="Image of an AI person" />
 
     <ul class="navbar-item-two">
       <li class="menu-item"><router-link to="/">Home</router-link></li>

@@ -1,5 +1,7 @@
 <template>
-    <h1>DALL-E Image Generator</h1>
+    <h1>DALL-E Image Generation</h1>
+    <h2>Given a prompt, the model will generate a new image.</h2>
+
     <div class="container">
         <div class="container--query">
             <p class="description">Start with a detailed decription</p>
@@ -16,10 +18,11 @@
 
         <div class="container--options">
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
-            <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate" />
+            <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate"
+                v-tooltip="tooltip.number_of_images" />
 
             <label for="picture-size">Picture Size</label>
-            <div class="select">
+            <div class="select" v-tooltip="tooltip.image_size">
                 <select id="picture-size" v-model="pictureSize">
                     <option value="256x256">256x256</option>
                     <option value="512x512">512x512</option>
@@ -35,6 +38,8 @@
 <script setup>
 import { ref } from "vue";
 import { doFetch } from "@/modules/doFetch.js";
+import tooltip from "@/modules/useTooltip.js";
+
 
 // ========= Vars ========================== //
 const dalleURL = `https://api.openai.com/v1/images/generations`;
@@ -71,7 +76,12 @@ const fetchImages = async () => {
 <style scoped>
 h1 {
     font-family: var(--heading-font);
-    margin-bottom: 64px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.4rem;
+    margin-bottom: 45px;
 }
 
 /* ====== Grid Container ============== */
