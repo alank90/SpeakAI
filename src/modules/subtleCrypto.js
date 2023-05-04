@@ -27,7 +27,6 @@ function getMessageEncoding(data) {
   */
 async function encryptionFunction(data, key) {
   let encodedString = getMessageEncoding(data);
-  // console.log(encodedString);
   ciphertext = await window.crypto.subtle.encrypt(
     {
       name: "RSA-OAEP",

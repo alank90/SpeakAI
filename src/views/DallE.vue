@@ -57,7 +57,6 @@ const fetchImages = async () => {
     loading.value = true;
     // Check if there was a previous query
     if (retrievedImages.value !== null) {
-        console.log("in if");
         // delete previous results
         retrievedImages.value = null;
     }
