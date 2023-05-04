@@ -79,7 +79,6 @@ const openAIURL = "https://api.openai.com/v1/chat/completions";
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
-myHeaders.append("OpenAI-Organization", `${import.meta.env.VITE_ORG_ID}`);
 
 // ======= Vars ==================== // 
 let apiKey = ref("");
