@@ -1,20 +1,28 @@
 <template>
-    <h1>DALL-E Image Generation</h1>
-    <h2>Given a prompt, the model will generate a new image.</h2>
+    <div class="container--header">
+        <h1>DALL-E Image Generation</h1>
+        <h2>Given a prompt, the model will generate a new image.</h2>
+    </div>
 
-    <div class="container">
+
+    <div class="container--body">
         <div class="container--query">
             <p class="description">Start with a detailed decription</p>
-            <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
-                v-model="dalleQuery" clear />
-            <button @click="fetchImages" class="btn--image-query">Query</button>
+            <div class="container--btn">
+                <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
+                    v-model="dalleQuery" clear />
+                <button @click="fetchImages" class="btn--image-query">Query</button>
+            </div>
         </div>
         <div v-if="retrievedImages" class="container--img">
             <img v-for="(item, index) in retrievedImages.data" :src="item.url" alt="A Picture" :key="index">
             {{ introText }}
 
+            <p class="loading" v-if="loading">Retrieving images...</p>
+            <p v-if="retrievedImages.error"> {{ retrievedImages.error.message }}</p>
+
         </div>
-        <p class="loading" v-else-if="loading">Retrieving images...</p>
+
 
         <div class="container--options">
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
@@ -32,6 +40,11 @@
             </div>
 
         </div>
+
+        <div v-for="(item, index) in imagesHistory" class="container--history" :key="index">
+            <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
+        </div>
+
     </div>
 </template>
 
@@ -45,8 +58,8 @@ import tooltip from "@/modules/useTooltip.js";
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
 let retrievedImages = ref(null);
+const imagesHistory = ref([]);
 let imagesToGenerate = ref(1);
-// let error = ref(null);
 let pictureSize = ref("256x256");
 let loading = ref(false);
 const introText = ref("✅ The images will be displayed here.");
@@ -56,17 +69,25 @@ let queryOptions = ref({
     size: pictureSize,
 });
 
+// ============ End of Vars declarations ======== //
+
 // ============== Methods ======================== //
 // ==== Fetch images ==== //
 const fetchImages = async () => {
     loading.value = true;
+
     // Check if there was a previous query
     if (retrievedImages.value !== null) {
+        // push the results onto imagesHistory array
+        imagesHistory.value.push(retrievedImages.value.data);
+
         // delete previous results
         retrievedImages.value = null;
     }
-
+    // do fetch to openAI endpoint
     retrievedImages.value = await doFetch(dalleURL, queryOptions);
+
+
     loading.value = false;
     introText.value = "";
 
@@ -82,17 +103,18 @@ h1 {
 h2 {
     font-size: 1.4rem;
     margin-bottom: 45px;
-    text-align: center;
+    width: 100%;
+    margin: 0 auto;
 }
 
 /* ====== Grid Container ============== */
-.container {
+.container--body {
     display: grid;
-    grid-template-columns: repeat(3, 33%);
+    grid-template-columns: repeat(4, 25%);
     grid-template-rows: auto;
     grid-template-areas:
-        "query query options"
-        "results results results";
+        "query query options history"
+        "results results results .";
     gap: 20px 10px;
     justify-items: stretch;
     align-items: start;
@@ -100,7 +122,10 @@ h2 {
 
 .container--query {
     grid-area: query;
+    border-right: 0.5px solid var(--main-ai-color);
+    padding-right: 10px;
 }
+
 
 .container--options {
     grid-area: options;
@@ -108,10 +133,29 @@ h2 {
 
 .container--img {
     grid-area: results;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-around;
+    gap: 5px;
+    font-size: 1.2rem;
+    font-weight: 550;
+    font-family: var(--letter-font);
+    color: var(--letter-ai-color);
+    margin: 40px 0;
+}
+
+.container--history {
+    grid-area: history;
+    display: flex;
+    column-gap: 3px;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
 }
 
 
 /* ====== End Grid Container ========== */
+
 
 
 label {
@@ -158,18 +202,16 @@ label {
     background-color: #faecfbb7;
 }
 
-.container--img {
+.container--btn {
     display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    justify-content: space-around;
-    gap: 5px;
-    font-size: 1.2rem;
-    font-weight: 550;
-    font-family: var(--letter-font);
-    color: var(--letter-ai-color);
-    margin: 40px 0;
+    flex-flow: row nowrap;
+    margin: 0 0 0 5px;
+
 }
+
+
+
+
 
 .loading {
     font-size: 1.3rem;
