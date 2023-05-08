@@ -13,16 +13,18 @@
                     v-model="dalleQuery" clear />
                 <button @click="fetchImages" class="btn--image-query">Query</button>
             </div>
+
+            <p v-if="loading" class="loading">Retrieving images...</p>
         </div>
+
+
+
         <div v-if="retrievedImages" class="container--img">
             <img v-for="(item, index) in retrievedImages.data" :src="item.url" alt="A Picture" :key="index">
             {{ introText }}
 
-            <p class="loading" v-if="loading">Retrieving images...</p>
             <p v-if="retrievedImages.error"> {{ retrievedImages.error.message }}</p>
-
         </div>
-
 
         <div class="container--options">
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
@@ -41,10 +43,15 @@
 
         </div>
 
-        <div v-for="(item, index) in imagesHistory" class="container--history" :key="index">
-            <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
-        </div>
 
+
+        <div class="container--history">
+            <div @click="imagesHistoryVisibility" class="arrow">test</div>
+            <div v-for="(item, index) in imagesHistory" class="container--history" :key="index">
+                <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
+
+            </div>
+        </div>
     </div>
 </template>
 
@@ -92,6 +99,14 @@ const fetchImages = async () => {
     introText.value = "";
 
 };
+
+// ======= Toggle display of imagesHistory column ============ //
+const imagesHistoryVisibility = () => {
+    console.log(" Stop clicking me!");
+    const el = document.querySelector(".container--body");
+    console.log(el);
+    el.classList.toggle("container--body-visibility");
+};
 </script>
 
 <style scoped>
@@ -110,7 +125,7 @@ h2 {
 /* ====== Grid Container ============== */
 .container--body {
     display: grid;
-    grid-template-columns: repeat(4, 25%);
+    grid-template-columns: repeat(3, 25%) minmax(0, auto);
     grid-template-rows: auto;
     grid-template-areas:
         "query query options history"
@@ -118,6 +133,10 @@ h2 {
     gap: 20px 10px;
     justify-items: stretch;
     align-items: start;
+}
+
+div.container--body-visibility {
+    grid-template-columns: repeat(3, 33%) minmax(0, 0);
 }
 
 .container--query {
@@ -145,14 +164,43 @@ h2 {
     margin: 40px 0;
 }
 
+/* ======== Arrow Stylings ======================= */
+.arrow {
+    grid-area: arrow;
+    background: #ac51b5;
+    position: absolute;
+    left: 0;
+    top: 40px;
+    width: 30px;
+    height: 30px;
+    margin: 15px;
+    -webkit-transform: rotate(135deg);
+    -moz-transform: rotate(135deg);
+    transform: rotate(135deg);
+    -o-transform: rotate(135deg);
+    z-index: 999;
+}
+
+.arrow:after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 30px;
+    height: 30px;
+    background: #f5f5f5;
+}
+
+/* =========== End arrow stylings ============== */
+
 .container--history {
     grid-area: history;
     display: flex;
+    position: relative;
     column-gap: 3px;
     flex-flow: row nowrap;
     justify-content: space-evenly;
 }
-
 
 /* ====== End Grid Container ========== */
 
@@ -216,6 +264,7 @@ label {
 .loading {
     font-size: 1.3rem;
     font-weight: 600;
+    margin-top: 50px;
 }
 
 .description {
