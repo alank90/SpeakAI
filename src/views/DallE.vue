@@ -19,7 +19,7 @@
 
 
 
-        <div v-if="retrievedImages" class="container--img">
+        <div @click="swapOutRetrievedImages" v-if="retrievedImages" class="container--img">
             <img v-for="(item, index) in retrievedImages.data" :src="item.url" alt="A Picture" :key="index">
             {{ introText }}
 
@@ -40,16 +40,13 @@
                 </select>
                 <span class="focus"></span>
             </div>
-
         </div>
-
 
 
         <div class="container--history">
             <div @click="imagesHistoryVisibility" class="arrow">test</div>
-            <div v-for="(item, index) in imagesHistory" class="container--history" :key="index">
+            <div v-for="(item, index) in imagesHistory" class="container--history-img" :key="index">
                 <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
-
             </div>
         </div>
     </div>
@@ -100,13 +97,32 @@ const fetchImages = async () => {
 
 };
 
-// ======= Toggle display of imagesHistory column ============ //
+// ======= Toggle display of History column ============ //
+/**
+ * @Description - Function to hide/show the previous pictures queried
+ */
 const imagesHistoryVisibility = () => {
-    console.log(" Stop clicking me!");
     const el = document.querySelector(".container--body");
-    console.log(el);
-    el.classList.toggle("container--body-visibility");
+    const elArrow = document.querySelector(".arrow");
+    el.classList.toggle("container--body-history-visibility");
+    elArrow.classList.toggle("arrow-rotate");
 };
+
+// ============ End Toggle function ================ //
+
+// ---------------------------------------------------------------------- 
+
+// ========== Swap Function ============================= //
+/**
+ * @Description - Function to swap out selected container--history 
+ *  element into container--img element
+ */
+const swapOutRetrievedImages = () => {
+    console.log("You clicked me!");
+};
+
+// =================== End Swap Function =================== //
+
 </script>
 
 <style scoped>
@@ -133,10 +149,12 @@ h2 {
     gap: 20px 10px;
     justify-items: stretch;
     align-items: start;
+    transition: grid-template-columns 0.4s ease-in;
 }
 
-div.container--body-visibility {
+.container--body-history-visibility {
     grid-template-columns: repeat(3, 33%) minmax(0, 0);
+
 }
 
 .container--query {
@@ -151,11 +169,10 @@ div.container--body-visibility {
 }
 
 .container--img {
+    display: grid;
     grid-area: results;
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    justify-content: space-around;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    justify-items: center;
     gap: 5px;
     font-size: 1.2rem;
     font-weight: 550;
@@ -164,21 +181,43 @@ div.container--body-visibility {
     margin: 40px 0;
 }
 
-/* ======== Arrow Stylings ======================= */
+.container--history {
+    display: flex;
+    grid-area: history;
+    position: relative;
+}
+
+.container--history-img {
+    display: flex;
+    flex-flow: row nowrap;
+    flex-basis: 25%;
+    gap: 5px;
+    width: 0;
+    /* takes effect when grid-template-column is changed*/
+}
+
+.container--history-img>img {
+    object-fit: cover;
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+    border-radius: 5px;
+}
+
+/* ====== End Grid Container ========== */
+
+
+/* ======== Arrow Stylings ====== */
 .arrow {
-    grid-area: arrow;
     background: #ac51b5;
-    position: absolute;
-    left: 0;
-    top: 40px;
-    width: 30px;
-    height: 30px;
-    margin: 15px;
-    -webkit-transform: rotate(135deg);
+    width: 17px;
+    height: 17px;
+    margin-right: 15px;
     -moz-transform: rotate(135deg);
     transform: rotate(135deg);
     -o-transform: rotate(135deg);
     z-index: 999;
+    transition: transform 0.4s ease-in;
 }
 
 .arrow:after {
@@ -188,21 +227,16 @@ div.container--body-visibility {
     top: 2px;
     width: 30px;
     height: 30px;
-    background: #f5f5f5;
+    background: var(--color-light);
 }
 
-/* =========== End arrow stylings ============== */
-
-.container--history {
-    grid-area: history;
-    display: flex;
-    position: relative;
-    column-gap: 3px;
-    flex-flow: row nowrap;
-    justify-content: space-evenly;
+.arrow-rotate {
+    -moz-transform: rotate(315deg);
+    transform: rotate(315deg);
+    -o-transform: rotate(315deg);
 }
 
-/* ====== End Grid Container ========== */
+/* ==== End arrow stylings ===== */
 
 
 
