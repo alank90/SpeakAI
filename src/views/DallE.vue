@@ -45,7 +45,8 @@
 
         <div class="container--history">
             <div @click="imagesHistoryVisibility" class="arrow">test</div>
-            <div v-for="(item, index) in imagesHistory" class="container--history-img" :key="index">
+            <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
+                :key="index">
                 <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
             </div>
         </div>
@@ -75,6 +76,8 @@ let queryOptions = ref({
 
 // ============ End of Vars declarations ======== //
 
+
+
 // ============== Methods ======================== //
 // ==== Fetch images ==== //
 const fetchImages = async () => {
@@ -91,15 +94,43 @@ const fetchImages = async () => {
     // do fetch to openAI endpoint
     retrievedImages.value = await doFetch(dalleURL, queryOptions);
 
-
     loading.value = false;
     introText.value = "";
+
+    // Add event listener to container--history 
+    // for inserting a history-image array into retrievedImages array
+    // when user clicks on a row of images in the imagesHistory container
+    const el = document.querySelector(".container--history-img");
+    console.log(el);
+    if (el) {
+        el.addEventListener("click", (e) => {
+            const elClicked = e.target;
+            const elParent = elClicked.parentElement;
+            console.log(elClicked);
+            console.log(elParent);
+            if (elParent.classlist.contains("container--history-img")) {
+                const index = elParent.dataset.imageArray;
+                console.log(index);
+
+                // Replace retrievedImages array elements w/contents 
+                // of the imagesHistoryItems array
+                retrievedImages.value.length = 0;
+                retrievedImages.value.data.push(imagesHistory[index]);
+            } else {
+                console.log("DO nothing..");
+            }
+        });
+    }
+
+    // =================== End event listener =================== //
+
 
 };
 
 // ======= Toggle display of History column ============ //
 /**
  * @Description - Function to hide/show the previous pictures queried
+ *  column
  */
 const imagesHistoryVisibility = () => {
     const el = document.querySelector(".container--body");
@@ -110,18 +141,8 @@ const imagesHistoryVisibility = () => {
 
 // ============ End Toggle function ================ //
 
-// ---------------------------------------------------------------------- 
+// ----------------------------------------------------------------------  //
 
-// ========== Swap Function ============================= //
-/**
- * @Description - Function to swap out selected container--history 
- *  element into container--img element
- */
-const swapOutRetrievedImages = () => {
-    console.log("You clicked me!");
-};
-
-// =================== End Swap Function =================== //
 
 </script>
 
@@ -169,20 +190,19 @@ h2 {
 }
 
 .container--img {
-    display: grid;
+    display: flex;
+    flex-flow: row wrap;
     grid-area: results;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     justify-items: center;
-    gap: 5px;
+    gap: 5px 5px;
     font-size: 1.2rem;
     font-weight: 550;
     font-family: var(--letter-font);
     color: var(--letter-ai-color);
-    margin: 40px 0;
+    margin: 30px 0;
 }
 
 .container--history {
-    display: flex;
     grid-area: history;
     position: relative;
 }
@@ -190,10 +210,9 @@ h2 {
 .container--history-img {
     display: flex;
     flex-flow: row nowrap;
-    flex-basis: 25%;
     gap: 5px;
-    width: 0;
-    /* takes effect when grid-template-column is changed*/
+    max-width: 25%;
+    margin-bottom: 2px;
 }
 
 .container--history-img>img {
@@ -209,10 +228,11 @@ h2 {
 
 /* ======== Arrow Stylings ====== */
 .arrow {
+    position: relative;
+    top: -15px;
     background: #ac51b5;
     width: 17px;
     height: 17px;
-    margin-right: 15px;
     -moz-transform: rotate(135deg);
     transform: rotate(135deg);
     -o-transform: rotate(135deg);
