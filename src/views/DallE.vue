@@ -44,7 +44,7 @@
 
 
         <div class="container--history">
-            <div @click="imagesHistoryVisibility" class="arrow">test</div>
+            <div @click="imagesHistoryVisibility" class="arrow"></div>
             <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
                 :key="index">
                 <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, unref } from "vue";
 import { doFetch } from "@/modules/doFetch.js";
 import tooltip from "@/modules/useTooltip.js";
 
@@ -84,15 +84,17 @@ const fetchImages = async () => {
     loading.value = true;
 
     // Check if there was a previous query
-    if (retrievedImages.value !== null) {
+    /* if (retrievedImages.value !== null) {
         // push the results onto imagesHistory array
         imagesHistory.value.push(retrievedImages.value.data);
 
         // delete previous results
         retrievedImages.value = null;
-    }
+    } */
     // do fetch to openAI endpoint
     retrievedImages.value = await doFetch(dalleURL, queryOptions);
+    // push the results onto imagesHistory array
+    imagesHistory.value.push(retrievedImages.value.data);
 
     loading.value = false;
     introText.value = "";
@@ -100,30 +102,34 @@ const fetchImages = async () => {
     // Add event listener to container--history 
     // for inserting a history-image array into retrievedImages array
     // when user clicks on a row of images in the imagesHistory container
-    const el = document.querySelector(".container--history-img");
+    const el = document.querySelector(".container--body");
     console.log(el);
-    if (el) {
+
+    if (!el.classList.contains("click-handler")) {
+        el.classList.add("click-handler");
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
-            const elParent = elClicked.parentElement;
-            console.log(elClicked);
-            console.log(elParent);
-            if (elParent.classlist.contains("container--history-img")) {
+            if (elClicked.parentElement.hasAttribute("data-image-array")) {
+                const elParent = elClicked.parentElement;
                 const index = elParent.dataset.imageArray;
+                console.log(elParent);
                 console.log(index);
 
-                // Replace retrievedImages array elements w/contents 
-                // of the imagesHistoryItems array
-                retrievedImages.value.length = 0;
-                retrievedImages.value.data.push(imagesHistory[index]);
-            } else {
-                console.log("DO nothing..");
+                if (elParent.classList.contains("container--history-img")) {
+                    console.log('in event if');
+                    // Replace retrievedImages array elements w/contents 
+                    // of the imagesHistoryItems array
+                    retrievedImages.value.data.pop();
+                    console.log(retrievedImages.value.data);
+                    /* retrievedImages.value.data.push(imagesHistory.value[index]);
+                    console.log(imagesHistory.value[index]); */
+                } else {
+                    console.log("DO nothing..");
+                }
             }
         });
     }
-
     // =================== End event listener =================== //
-
 
 };
 
