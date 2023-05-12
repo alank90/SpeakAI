@@ -19,11 +19,11 @@
 
 
 
-        <div @click="swapOutRetrievedImages" v-if="retrievedImages" class="container--img">
-            <img v-for="(item, index) in retrievedImages.data" :src="item.url" alt="A Picture" :key="index">
+        <div @click="swapOutRetrievedImages" v-if="currentImages" class="container--img">
+            <img v-for="(item, index) in currentImages.data" :src="item.url" alt="An AI Generated Picture" :key="index">
             {{ introText }}
 
-            <p v-if="retrievedImages.error"> {{ retrievedImages.error.message }}</p>
+            <p v-if="currentImages.error"> {{ currentImages.error.message }}</p>
         </div>
 
         <div class="container--options">
@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, unref } from "vue";
+import { ref } from "vue";
 import { doFetch } from "@/modules/doFetch.js";
 import tooltip from "@/modules/useTooltip.js";
 
@@ -62,7 +62,7 @@ import tooltip from "@/modules/useTooltip.js";
 // ========= Vars ========================== //
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
-let retrievedImages = ref(null);
+let currentImages = ref(null);
 const imagesHistory = ref([]);
 let imagesToGenerate = ref(1);
 let pictureSize = ref("256x256");
@@ -83,48 +83,39 @@ let queryOptions = ref({
 const fetchImages = async () => {
     loading.value = true;
 
-    // Check if there was a previous query
-    /* if (retrievedImages.value !== null) {
-        // push the results onto imagesHistory array
-        imagesHistory.value.push(retrievedImages.value.data);
+    // Clear the currentImages array
+    currentImages.value = null;
 
-        // delete previous results
-        retrievedImages.value = null;
-    } */
     // do fetch to openAI endpoint
-    retrievedImages.value = await doFetch(dalleURL, queryOptions);
-    // push the results onto imagesHistory array
-    imagesHistory.value.push(retrievedImages.value.data);
+    currentImages.value = await doFetch(dalleURL, queryOptions);
+    // push the results onto start of the imagesHistory array
+    imagesHistory.value.unshift(currentImages.value.data);
 
     loading.value = false;
     introText.value = "";
 
     // Add event listener to container--history 
-    // for inserting a history-image array into retrievedImages array
+    // for inserting a history-image array into currentImages array
     // when user clicks on a row of images in the imagesHistory container
     const el = document.querySelector(".container--body");
-    console.log(el);
 
     if (!el.classList.contains("click-handler")) {
         el.classList.add("click-handler");
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
-            if (elClicked.parentElement.hasAttribute("data-image-array")) {
-                const elParent = elClicked.parentElement;
+            const elParent = elClicked.parentElement;
+            console.log(elClicked.parentElement);
+            if (elParent.hasAttribute("data-image-array") || elParent.classList.contains("container--img")) {
                 const index = elParent.dataset.imageArray;
-                console.log(elParent);
-                console.log(index);
 
                 if (elParent.classList.contains("container--history-img")) {
                     console.log('in event if');
-                    // Replace retrievedImages array elements w/contents 
+                    // Replace currentImages array elements w/contents 
                     // of the imagesHistoryItems array
-                    retrievedImages.value.data.pop();
-                    console.log(retrievedImages.value.data);
-                    /* retrievedImages.value.data.push(imagesHistory.value[index]);
-                    console.log(imagesHistory.value[index]); */
-                } else {
-                    console.log("DO nothing..");
+                    currentImages.value.data = imagesHistory.value[index];
+                } else if (elParent.classList.contains("container--img")) {
+                    elClicked.classList.toggle("scale-element");
+                    console.log("In scale..");
                 }
             }
         });
@@ -205,7 +196,18 @@ h2 {
     font-weight: 550;
     font-family: var(--letter-font);
     color: var(--letter-ai-color);
-    margin: 30px 0;
+    margin: 30px 10px;
+}
+
+img[alt="An AI Generated Picture"] {
+    transition: all 1s ease-in-out;
+}
+
+img[alt="An AI Generated Picture"].scale-element {
+    display: block;
+    transform: scale(2);
+    margin: 0 20%;
+    z-index: 9999;
 }
 
 .container--history {
@@ -316,10 +318,6 @@ label {
     margin: 0 0 0 5px;
 
 }
-
-
-
-
 
 .loading {
     font-size: 1.3rem;
