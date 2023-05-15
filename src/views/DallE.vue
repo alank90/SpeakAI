@@ -18,11 +18,18 @@
         </div>
 
 
-
         <div @click="swapOutRetrievedImages" v-if="currentImages" class="container--img">
-            <img v-for="(item, index) in currentImages.data" :src="item.url" alt="An AI Generated Picture" :key="index">
-            {{ introText }}
-
+            <a v-for="(item, index) in currentImages.data" @click.prevent="
+                downloadImage({
+                    url:
+                        item.url,
+                    label: 'example.pdf',
+                })
+                " class="anchor-image" download href="#" :key="index">
+                <i class="fa fa-download">Download</i>
+                <img :src="item.url" alt="An AI Generated Picture">
+                {{ introText }}
+            </a>
             <p v-if="currentImages.error"> {{ currentImages.error.message }}</p>
         </div>
 
@@ -104,7 +111,6 @@ const fetchImages = async () => {
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
             const elParent = elClicked.parentElement;
-            console.log(elClicked.parentElement);
             if (elParent.hasAttribute("data-image-array") || elParent.classList.contains("container--img")) {
                 const index = elParent.dataset.imageArray;
 
@@ -115,7 +121,6 @@ const fetchImages = async () => {
                     currentImages.value.data = imagesHistory.value[index];
                 } else if (elParent.classList.contains("container--img")) {
                     elClicked.classList.toggle("scale-element");
-                    console.log("In scale..");
                 }
             }
         });
@@ -123,6 +128,7 @@ const fetchImages = async () => {
     // =================== End event listener =================== //
 
 };
+
 
 // ======= Toggle display of History column ============ //
 /**
@@ -138,8 +144,32 @@ const imagesHistoryVisibility = () => {
 
 // ============ End Toggle function ================ //
 
-// ----------------------------------------------------------------------  //
+/**
+ * @Description - download a image w/fetch
+ * @param {*} url 
+ * @param {*} label 
+ */
+const downloadImage = async (options, label) => {
+    console.log(options.url, options.label);
 
+    const response = await fetch(options.url);
+    const fetchedImg = response.blob();
+    console.log(fetchedImg);
+
+    /*  const reader = new FileReader();
+     console.log(reader);
+     reader.onloadend = async () => {
+         const base64data = reader.result;
+         console.log(base64data);
+         console.log(label);
+ 
+         const res = await fetch(options.url);
+         const imageBlob = await res.blob();
+         reader.readAsDataURL(imageBlob); 
+};*/
+};
+
+// ----------------------------------------------------------------------  //
 
 </script>
 
@@ -200,14 +230,39 @@ h2 {
 }
 
 img[alt="An AI Generated Picture"] {
-    transition: all 1s ease-in-out;
+    transition: transform 0.4s;
 }
 
 img[alt="An AI Generated Picture"].scale-element {
-    display: block;
-    transform: scale(2);
-    margin: 0 20%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    transform: scale(3);
     z-index: 9999;
+
+}
+
+a.anchor-image {
+    background-color: var(--select-border);
+    border: none;
+    color: white;
+    padding-top: 12px;
+    cursor: pointer;
+    font-size: .9rem;
+    text-align: right;
+    transition: background-color .3s ease-in;
+}
+
+a.anchor-image:hover {
+    background-color: #880894ea;
+}
+
+i {
+    text-align: right;
+    margin-right: 5px;
 }
 
 .container--history {
