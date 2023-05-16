@@ -25,45 +25,49 @@
     </div>
 
     <div class="chat-options">
-      <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
-      <button @click="addAPIKey" class="btn--api-key" id="add-key">
-        Store API Key
-      </button>
-      <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
-        Clear API Key
-      </button>
+      <div @click="toggleApiOptionsVisibility" class="arrow"></div>
 
-      <label for="modelt">Model</label>
-      <div class="select" v-tooltip="tooltip.model">
-        <select id="model" v-model="chatModel">
-          <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
-          <option value="text-davinci-003">Text-davinci-003</option>
-          <option value="text-curie-001">Text-Curie-001</option>
-          <option value="text-babbage-001">Text-Babbage-001</option>
-          <option value="text-Ada-001">Text-Ada-001</option>
-        </select>
-        <span class="focus"></span>
-      </div>
+      <div class="options">
+        <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
+        <button @click="addAPIKey" class="btn--api-key" id="add-key">
+          Store API Key
+        </button>
+        <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
+          Clear API Key
+        </button>
 
-      <label for="temperature">Temperature: {{ temperatureValue }}</label>
-      <input type="range" id="temperature" name="temperature" min="0" max="1" step=".01" v-model="temperatureValue"
-        v-tooltip="tooltip.temperature" />
+        <label for="modelt">Model</label>
+        <div class="select" v-tooltip="tooltip.model">
+          <select id="model" v-model="chatModel">
+            <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
+            <option value="text-davinci-003">Text-davinci-003</option>
+            <option value="text-curie-001">Text-Curie-001</option>
+            <option value="text-babbage-001">Text-Babbage-001</option>
+            <option value="text-Ada-001">Text-Ada-001</option>
+          </select>
+          <span class="focus"></span>
+        </div>
 
-      <label for="top_P">Top P: {{ topP }}</label>
-      <input type="range" id="top_P" name="top_P" min="0" max="1" step=".01" v-model="topP" v-tooltip="tooltip.top_p" />
+        <label for="temperature">Temperature: {{ temperatureValue }}</label>
+        <input type="range" id="temperature" name="temperature" min="0" max="1" step=".01" v-model="temperatureValue"
+          v-tooltip="tooltip.temperature" />
 
-      <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
-      <input type="range" id="max_tokens" name="max_tokens" min="0" max="2048" step="5" v-model="maxTokens"
-        v-tooltip="tooltip.max_tokens" />
+        <label for="top_P">Top P: {{ topP }}</label>
+        <input type="range" id="top_P" name="top_P" min="0" max="1" step=".01" v-model="topP" v-tooltip="tooltip.top_p" />
 
-      <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>
-      <p class="stop-sequence-note">Add sequence then hit Enter</p>
-      <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
-        @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
+        <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
+        <input type="range" id="max_tokens" name="max_tokens" min="0" max="2048" step="5" v-model="maxTokens"
+          v-tooltip="tooltip.max_tokens" />
+
+        <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>
+        <p class="stop-sequence-note">Add sequence then hit Enter</p>
+        <textarea id="stop_sequences" name="stop_sequences" placeholder="i.e., a . or \n" rows="4" cols="20"
+          @keyup="checkKey" v-tooltip="tooltip.stop_sequence">
       </textarea>
 
-      <label for="start_text">Inject start text</label>
-      <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text"></textarea>
+        <label for="start_text">Inject start text</label>
+        <textarea name="start_text" id="start_text" cols="20" rows="2" v-tooltip="tooltip.start_text"></textarea>
+      </div>
     </div>
   </div>
 </template>
@@ -233,6 +237,15 @@ const clearAPIKey = async () => {
   await removeDB(dbName);
 
 };
+
+/**
+ * @Description - Toggle visibility of the options on page
+ */
+
+const toggleApiOptionsVisibility = () => {
+  const el = document.querySelector(".options");
+  el.classList.toggle("el-height");
+};
 </script>
 
 <style scoped>
@@ -258,6 +271,21 @@ h1 {
 
 .chat-options {
   grid-area: options;
+  transition: all .6s ease-in;
+}
+
+.el-height {
+  opacity: 0;
+}
+
+.arrow {
+  width: 25px;
+  height: 25px;
+  border-width: 0 3px 3px 0;
+  border-color: var(--main-theme-color);
+  border-style: solid;
+  margin: 0 auto 9px;
+  transform: rotate(45deg);
 }
 
 .input {
@@ -351,7 +379,7 @@ select::-ms-expand {
   cursor: pointer;
   line-height: 1.1;
   background-color: #fff;
-  background-image: linear-gradient(to top, #f9f9f9, #ac51b5 33%);
+  background-image: linear-gradient(to top, #f9f9f9, var(--main-theme-color) 33%);
 }
 
 .select select,
@@ -436,7 +464,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   height: 12.8px;
   cursor: pointer;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  background: #ac51b5;
+  background: var(--main-theme-color);
   border-radius: 25px;
   border: 0px solid #000101;
 }
@@ -454,7 +482,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-runnable-track {
-  background: #ac51b5;
+  background: var(--main-theme-color);
 }
 
 input[type="range"]::-moz-range-track {
@@ -462,7 +490,7 @@ input[type="range"]::-moz-range-track {
   height: 12.8px;
   cursor: pointer;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-  background: #ac51b5;
+  background: var(--main-theme-color);
   border-radius: 25px;
   border: 0px solid #000101;
 }
@@ -488,14 +516,14 @@ input[type="range"]::-ms-track {
 }
 
 input[type="range"]::-ms-fill-lower {
-  background: #ac51b5;
+  background: var(--main-theme-color);
   border: 0px solid #000101;
   border-radius: 50px;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 }
 
 input[type="range"]::-ms-fill-upper {
-  background: #ac51b5;
+  background: var(--main-theme-color);
   border: 0px solid #000101;
   border-radius: 50px;
   box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
@@ -512,11 +540,11 @@ input[type="range"]::-ms-thumb {
 }
 
 input[type="range"]:focus::-ms-fill-lower {
-  background: #ac51b5;
+  background: var(--main-theme-color);
 }
 
 input[type="range"]:focus::-ms-fill-upper {
-  background: #ac51b5;
+  background: var(--main-theme-color);
 }
 
 /* ====== End Range input stylings =============== */
@@ -544,7 +572,7 @@ button {
   height: 32px;
   font-size: 16px;
   margin-top: 24px;
-  background: royalblue;
+  background: var(--main-theme-color);
   color: white;
   padding: 0.7em 1em;
   padding-left: 0.9em;
@@ -563,7 +591,7 @@ button {
   margin: 3px 0 5px;
   padding: 0;
   font-size: 0.9rem;
-  background-color: #ac51b5;
+  background-color: var(--main-theme-color);
 }
 
 .btn--clear-block:hover {
@@ -577,13 +605,12 @@ button {
   margin: 3px 0 5px;
   padding: 0;
   font-size: 0.9rem;
-  background-color: #ac51b5;
+  background-color: var(--main-theme-color);
 }
 
 .btn--api-key:hover {
   background-color: #ad51b5c4;
 }
-
 
 
 #add-key {

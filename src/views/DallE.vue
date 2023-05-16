@@ -19,14 +19,7 @@
 
 
         <div @click="swapOutRetrievedImages" v-if="currentImages" class="container--img">
-            <a v-for="(item, index) in currentImages.data" @click.prevent="
-                downloadImage({
-                    url:
-                        item.url,
-                    label: 'example.pdf',
-                })
-                " class="anchor-image" download href="#" :key="index">
-                <i class="fa fa-download">Download</i>
+            <a v-for="(item, index) in currentImages.data" download href="#" :key="index">
                 <img :src="item.url" alt="An AI Generated Picture">
                 {{ introText }}
             </a>
@@ -52,8 +45,10 @@
 
         <div class="container--history">
             <div @click="imagesHistoryVisibility" class="arrow"></div>
+            <button @click="imagesHistory = []; currentImages = null" v-if="imagesHistory.length > 0"
+                class="btn btn-clear">Clear</button>
             <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
-                :key="index">
+                :key="index" title="Click image(s) to swap out.">
                 <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
             </div>
         </div>
@@ -138,36 +133,14 @@ const fetchImages = async () => {
 const imagesHistoryVisibility = () => {
     const el = document.querySelector(".container--body");
     const elArrow = document.querySelector(".arrow");
-    el.classList.toggle("container--body-history-visibility");
+    const elClearBtn = document.querySelector(".btn-clear");
+    el.classList.toggle("container--history-visibility");
     elArrow.classList.toggle("arrow-rotate");
+    elClearBtn.classList.toggle("visibility");
 };
 
 // ============ End Toggle function ================ //
 
-/**
- * @Description - download a image w/fetch
- * @param {*} url 
- * @param {*} label 
- */
-const downloadImage = async (options, label) => {
-    console.log(options.url, options.label);
-
-    const response = await fetch(options.url);
-    const fetchedImg = response.blob();
-    console.log(fetchedImg);
-
-    /*  const reader = new FileReader();
-     console.log(reader);
-     reader.onloadend = async () => {
-         const base64data = reader.result;
-         console.log(base64data);
-         console.log(label);
- 
-         const res = await fetch(options.url);
-         const imageBlob = await res.blob();
-         reader.readAsDataURL(imageBlob); 
-};*/
-};
 
 // ----------------------------------------------------------------------  //
 
@@ -186,6 +159,59 @@ h2 {
     margin: 0 auto;
 }
 
+.btn {
+    align-items: center;
+    background-color: var(--main-theme-color);
+    border: 0;
+    border-radius: 100px;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    justify-content: center;
+    line-height: 20px;
+    max-width: 480px;
+    min-height: 40px;
+    min-width: 0px;
+    overflow: hidden;
+    padding: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: center;
+    touch-action: manipulation;
+    transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+    user-select: none;
+    -webkit-user-select: none;
+    vertical-align: middle;
+}
+
+.btn:hover,
+.btn:focus {
+    background-color: #b73ecc8a;
+    color: #ffffff;
+}
+
+.btn:active {
+    background: #690480;
+    color: rgb(255, 255, 255, .7);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, .08);
+    color: rgba(0, 0, 0, .3);
+}
+
+.btn.btn-clear {
+    position: relative;
+    top: -40px;
+    margin-left: 60px;
+}
+
+
 /* ====== Grid Container ============== */
 .container--body {
     display: grid;
@@ -200,7 +226,7 @@ h2 {
     transition: grid-template-columns 0.4s ease-in;
 }
 
-.container--body-history-visibility {
+.container--history-visibility {
     grid-template-columns: repeat(3, 33%) minmax(0, 0);
 
 }
@@ -242,27 +268,6 @@ img[alt="An AI Generated Picture"].scale-element {
     margin: auto;
     transform: scale(3);
     z-index: 9999;
-
-}
-
-a.anchor-image {
-    background-color: var(--select-border);
-    border: none;
-    color: white;
-    padding-top: 12px;
-    cursor: pointer;
-    font-size: .9rem;
-    text-align: right;
-    transition: background-color .3s ease-in;
-}
-
-a.anchor-image:hover {
-    background-color: #880894ea;
-}
-
-i {
-    text-align: right;
-    margin-right: 5px;
 }
 
 .container--history {
@@ -293,7 +298,7 @@ i {
 .arrow {
     position: relative;
     top: -15px;
-    background: #ac51b5;
+    background: var(--main-theme-color);
     width: 17px;
     height: 17px;
     -moz-transform: rotate(135deg);
@@ -423,7 +428,7 @@ select::-ms-expand {
     cursor: pointer;
     line-height: 1.1;
     background-color: #fff;
-    background-image: linear-gradient(to top, #f9f9f9, #ac51b5 33%);
+    background-image: linear-gradient(to top, #f9f9f9, var(--main-theme-color) 33%);
 }
 
 .select select,
@@ -508,7 +513,7 @@ input[type="range"]::-webkit-slider-runnable-track {
     height: 12.8px;
     cursor: pointer;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background: #ac51b5;
+    background: var(--main-theme-color);
     border-radius: 25px;
     border: 0px solid #000101;
 }
@@ -526,7 +531,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-runnable-track {
-    background: #ac51b5;
+    background: var(--main-theme-color);
 }
 
 input[type="range"]::-moz-range-track {
@@ -534,7 +539,7 @@ input[type="range"]::-moz-range-track {
     height: 12.8px;
     cursor: pointer;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
-    background: #ac51b5;
+    background: var(--main-theme-color);
     border-radius: 25px;
     border: 0px solid #000101;
 }
@@ -560,14 +565,14 @@ input[type="range"]::-ms-track {
 }
 
 input[type="range"]::-ms-fill-lower {
-    background: #ac51b5;
+    background: var(--main-theme-color);
     border: 0px solid #000101;
     border-radius: 50px;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
 }
 
 input[type="range"]::-ms-fill-upper {
-    background: #ac51b5;
+    background: var(--main-theme-color);
     border: 0px solid #000101;
     border-radius: 50px;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
@@ -584,12 +589,16 @@ input[type="range"]::-ms-thumb {
 }
 
 input[type="range"]:focus::-ms-fill-lower {
-    background: #ac51b5;
+    background: var(--main-theme-color);
 }
 
 input[type="range"]:focus::-ms-fill-upper {
-    background: #ac51b5;
+    background: var(--main-theme-color);
 }
 
 /* ====== End Range input stylings =============== */
+
+.visibility {
+    display: none;
+}
 </style>
