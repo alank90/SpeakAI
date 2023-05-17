@@ -19,14 +19,26 @@
 
 
         <div @click="swapOutRetrievedImages" v-if="currentImages" class="container--img">
-            <a v-for="(item, index) in currentImages.data" download href="#" :key="index">
+            <a v-for="(item, index) in currentImages.data" :key="index">
                 <img :src="item.url" alt="An AI Generated Picture">
                 {{ introText }}
             </a>
             <p v-if="currentImages.error"> {{ currentImages.error.message }}</p>
         </div>
 
+        <div class="container--history">
+            <button v-if="imagesHistory.length > 0" @click="imagesHistory = []; currentImages = null"
+                class="btn btn-clear">Clear</button>
+            <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
+                :key="index" title="Click image(s) to swap out.">
+                <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
+            </div>
+        </div>
+
+        <div v-if="imagesHistory.length > 0" @click="optionsVisibility" class="arrow"></div>
+
         <div class="container--options">
+
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
             <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate"
                 v-tooltip="tooltip.number_of_images" />
@@ -39,17 +51,6 @@
                     <option value="1024x1024">1024x1024</option>
                 </select>
                 <span class="focus"></span>
-            </div>
-        </div>
-
-
-        <div class="container--history">
-            <div @click="imagesHistoryVisibility" class="arrow"></div>
-            <button @click="imagesHistory = []; currentImages = null" v-if="imagesHistory.length > 0"
-                class="btn btn-clear">Clear</button>
-            <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
-                :key="index" title="Click image(s) to swap out.">
-                <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
             </div>
         </div>
     </div>
@@ -96,6 +97,11 @@ const fetchImages = async () => {
     loading.value = false;
     introText.value = "";
 
+    // Reconfigure --container-body grid for container--history
+    const elGrid = document.querySelector(".container--body");
+    elGrid.style.gridTemplateColumns = "repeat(3, 25%) 30px minmax(0, 20%)";
+
+
     // Add event listener to container--history 
     // for inserting a history-image array into currentImages array
     // when user clicks on a row of images in the imagesHistory container
@@ -130,13 +136,17 @@ const fetchImages = async () => {
  * @Description - Function to hide/show the previous pictures queried
  *  column
  */
-const imagesHistoryVisibility = () => {
+const optionsVisibility = () => {
     const el = document.querySelector(".container--body");
     const elArrow = document.querySelector(".arrow");
-    const elClearBtn = document.querySelector(".btn-clear");
-    el.classList.toggle("container--history-visibility");
+    el.style.gridTemplateColumns = "";
+
+    el.classList.toggle("container--options-visibility");
     elArrow.classList.toggle("arrow-rotate");
-    elClearBtn.classList.toggle("visibility");
+
+    if (!el.classList.contains("container--options-visibility")) {
+        el.style.gridTemplateColumns = "repeat(3, 25%) 30px minmax(0, 20%)";
+    }
 };
 
 // ============ End Toggle function ================ //
@@ -206,28 +216,28 @@ h2 {
 }
 
 .btn.btn-clear {
-    position: relative;
-    top: -40px;
-    margin-left: 60px;
+    margin: 10px 10px;
+    width: 40%;
 }
 
 
 /* ====== Grid Container ============== */
 .container--body {
     display: grid;
-    grid-template-columns: repeat(3, 25%) minmax(0, auto);
+    grid-template-columns: repeat(2, 25%) 0 30px minmax(0, 20%);
     grid-template-rows: auto;
     grid-template-areas:
-        "query query options history"
-        "results results results .";
+        "query query history arrow options"
+        "results results results results .";
     gap: 20px 10px;
+    margin-top: 6%;
     justify-items: stretch;
     align-items: start;
-    transition: grid-template-columns 0.4s ease-in;
+    transition: all 0.4s ease-in;
 }
 
-.container--history-visibility {
-    grid-template-columns: repeat(3, 33%) minmax(0, 0);
+.container--options-visibility {
+    grid-template-columns: repeat(2, 25%) minmax(0, 25%) 30px 0;
 
 }
 
@@ -240,6 +250,7 @@ h2 {
 
 .container--options {
     grid-area: options;
+    overflow: hidden;
 }
 
 .container--img {
@@ -296,11 +307,13 @@ img[alt="An AI Generated Picture"].scale-element {
 
 /* ======== Arrow Stylings ====== */
 .arrow {
+    grid-area: arrow;
     position: relative;
     top: -15px;
     background: var(--main-theme-color);
     width: 17px;
     height: 17px;
+    cursor: pointer;
     -moz-transform: rotate(135deg);
     transform: rotate(135deg);
     -o-transform: rotate(135deg);

@@ -244,8 +244,16 @@ const clearAPIKey = async () => {
 
 const toggleApiOptionsVisibility = () => {
   const el = document.querySelector(".options");
+  const elGridContainer = document.querySelector(".grid-container");
+  const elArrowRotate = document.querySelector(".arrow");
+  elGridContainer.classList.toggle("el-col-width");
   el.classList.toggle("el-height");
+  elArrowRotate.classList.toggle("el-rotate");
 };
+
+// -------------------------------------------------------------------------------------- //
+// ----------------------- End of Methods ----------------------------------------------- //
+// -------------------------------------------------------------------------------------- //
 </script>
 
 <style scoped>
@@ -261,6 +269,7 @@ h1 {
   grid-template-areas: "chat options";
   column-gap: 25px;
   justify-content: center;
+  transition: all .4s ease-out;
 }
 
 .chat {
@@ -274,6 +283,14 @@ h1 {
   transition: all .6s ease-in;
 }
 
+.options {
+  transition: all .5s ease-out;
+}
+
+.el-col-width {
+  grid-template-columns: 90% 10%;
+}
+
 .el-height {
   opacity: 0;
 }
@@ -284,9 +301,17 @@ h1 {
   border-width: 0 3px 3px 0;
   border-color: var(--main-theme-color);
   border-style: solid;
-  margin: 0 auto 9px;
+  margin: 0 auto 15px;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
   transform: rotate(45deg);
 }
+
+.arrow.el-rotate {
+  transform: rotate(225deg);
+}
+
+
 
 .input {
   width: calc(85% - 20px);
