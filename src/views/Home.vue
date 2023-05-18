@@ -629,7 +629,7 @@ button {
   max-width: 200px;
   margin: 3px 0 5px;
   padding: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background-color: var(--main-theme-color);
 }
 

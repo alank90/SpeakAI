@@ -27,8 +27,7 @@
         </div>
 
         <div class="container--history">
-            <button v-if="imagesHistory.length > 0" @click="imagesHistory = []; currentImages = null"
-                class="btn btn-clear">Clear</button>
+            <button v-if="imagesHistory.length > 0" @click="clearImagesHistory" class="btn btn-clear">Clear</button>
             <div v-for="(item, index) in imagesHistory" class="container--history-img" :data-image-array="index"
                 :key="index" title="Click image(s) to swap out.">
                 <img v-for="(picturesArray, index) in item" :src="picturesArray.url" alt="A Picture" :key="index">
@@ -66,7 +65,7 @@ import tooltip from "@/modules/useTooltip.js";
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
 let currentImages = ref(null);
-const imagesHistory = ref([]);
+let imagesHistory = ref([]);
 let imagesToGenerate = ref(1);
 let pictureSize = ref("256x256");
 let loading = ref(false);
@@ -97,9 +96,9 @@ const fetchImages = async () => {
     loading.value = false;
     introText.value = "";
 
-    // Reconfigure --container-body grid for container--history
+    // Reconfigure container--body grid for container--history being filled
     const elGrid = document.querySelector(".container--body");
-    elGrid.style.gridTemplateColumns = "repeat(3, 25%) 30px minmax(0, 20%)";
+    elGrid.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 20%";
 
 
     // Add event listener to container--history 
@@ -139,20 +138,36 @@ const fetchImages = async () => {
 const optionsVisibility = () => {
     const el = document.querySelector(".container--body");
     const elArrow = document.querySelector(".arrow");
-    el.style.gridTemplateColumns = "";
 
+    // Reconfigure container--body grid to adapt to whether container--options
+    // is visible
+    el.style.gridTemplateColumns = "";
     el.classList.toggle("container--options-visibility");
     elArrow.classList.toggle("arrow-rotate");
-
-    if (!el.classList.contains("container--options-visibility")) {
-        el.style.gridTemplateColumns = "repeat(3, 25%) 30px minmax(0, 20%)";
+    if (el.classList.contains("container--options-visibility")) {
+        el.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 0";
+    } else {
+        el.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 20%";
     }
 };
 
 // ============ End Toggle function ================ //
 
+/**
+ * @Description - imagesHistory clear button
+ */
+const clearImagesHistory = () => {
+    imagesHistory.value = [];
+    currentImages.value = null;
 
-// ----------------------------------------------------------------------  //
+    const el = document.querySelector(".container--body");
+    el.style.gridTemplateColumns = "";
+    el.style.gridTemplateColumns = "grid-template-columns: repeat(2, 25%) 0 30px 20%";
+    dalleQuery.value = "";
+};
+
+
+// ----------------------------------------------------------------------------------------------  //
 
 </script>
 
@@ -224,21 +239,16 @@ h2 {
 /* ====== Grid Container ============== */
 .container--body {
     display: grid;
-    grid-template-columns: repeat(2, 25%) 0 30px minmax(0, 20%);
-    grid-template-rows: auto;
+    grid-template-columns: repeat(2, 25%) 0 30px 20%;
+    grid-template-rows: minmax(0, auto) auto;
     grid-template-areas:
         "query query history arrow options"
-        "results results results results .";
+        "results results results results results";
     gap: 20px 10px;
     margin-top: 6%;
     justify-items: stretch;
-    align-items: start;
-    transition: all 0.4s ease-in;
-}
-
-.container--options-visibility {
-    grid-template-columns: repeat(2, 25%) minmax(0, 25%) 30px 0;
-
+    align-items: flex-start;
+    transition: all 0.3s ease-in;
 }
 
 .container--query {

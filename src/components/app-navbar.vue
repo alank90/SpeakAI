@@ -7,6 +7,8 @@
       <li class="menu-item">
         <router-link to="/dalle">DALL-E</router-link>
       </li>
+      <li class="menu-item" title="Goto GPTZero to check if text was AI generated"><a
+          href="https://app.gptzero.me/app/welcome" target="_blank">GPTZero</a></li>
       <li class="menu-item"><router-link to="/about">About</router-link></li>
     </ul>
   </nav>
@@ -41,5 +43,19 @@
   padding: 8px;
   margin: 0 5px 0;
   text-decoration: none;
+}
+
+li {
+  background-image: linear-gradient(#121211, #070707);
+  background-size: 0 0.1em;
+  background-position-y: 85%;
+  background-position-x: 50%;
+  background-repeat: no-repeat;
+  transition: background-size 0.2s ease-in-out;
+}
+
+li:hover {
+  text-decoration-color: var(--main-theme-color);
+  background-size: 75% 0.1em;
 }
 </style>
