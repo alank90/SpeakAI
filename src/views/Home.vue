@@ -28,6 +28,8 @@
       <div @click="toggleApiOptionsVisibility" class="arrow"></div>
 
       <div class="options">
+        <div v-if="tokensUsed > 0" class="tokens">Tokens Used: {{ tokensUsed }}</div>
+
         <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
         <button @click="addAPIKey" class="btn--api-key" id="add-key">
           Store API Key
@@ -36,7 +38,16 @@
           Clear API Key
         </button>
 
-        <label for="modelt">Model</label>
+        <label for="mode">Mode</label>
+        <div class="select" v-tooltip="tooltip.mode">
+          <select id="mode" v-model="chatMode">
+            <option value="chat/completions">Chat</option>
+            <option value="completions">Complete</option>
+          </select>
+          <span class="focus"></span>
+        </div>
+
+        <label for="model">Model</label>
         <div class="select" v-tooltip="tooltip.model">
           <select id="model" v-model="chatModel">
             <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
@@ -78,16 +89,14 @@ import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
 
-
-const openAIURL = "https://api.openai.com/v1/chat/completions";
-
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
 // ======= Vars ==================== // 
 let apiKey = ref("");
-const content = ref("");
+let tokensUsed = ref(0);
 let chatModel = ref("gpt-3.5-turbo");
+let chatMode = ref("chat/completions");
 let decryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
@@ -96,11 +105,14 @@ let stopSequences = ref([]);
 let theStopSequence = "";
 
 const BTN_TEXT = "Submit 🚀";
+const content = ref("");
 const aiQuery = ref("");
 const aiResponse = ref("");
 const aiConversation = ref("");
 const introText = ref("📖 The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
+
+const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
 
 /* ================== Methods =============================== */
 /**
@@ -165,6 +177,9 @@ const askAi = async () => {
       aiResponse.value = `🤖 ${data.choices[0].message.content}`;
       aiConversation.value = insertStarterText ? `${aiQuery.value} \n ${insertStarterText} \n ${aiResponse.value} \n ${aiConversation.value} \n` :
         `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+
+      // Update tokens used
+      tokensUsed.value += data.usage.total_tokens;
       // Clear query 
       content.value = "";
     })
@@ -311,6 +326,11 @@ h1 {
   transform: rotate(225deg);
 }
 
+.tokens {
+  color: var(--main-theme-color);
+  font-weight: 550;
+  margin-bottom: 10px;
+}
 
 
 .input {
@@ -462,11 +482,12 @@ select[multiple] option {
 
 label {
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: 550;
 }
 
+
 .select+label {
-  margin-top: 2rem;
+  margin-top: 1.2rem;
 }
 
 /* === End Select Option Input stylings ===== */

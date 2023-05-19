@@ -37,7 +37,6 @@
         <div v-if="imagesHistory.length > 0" @click="optionsVisibility" class="arrow"></div>
 
         <div class="container--options">
-
             <label for="options"># of Images: {{ imagesToGenerate }}</label>
             <input type="range" id="options" name="options" min="1" max="10" step="1" v-model="imagesToGenerate"
                 v-tooltip="tooltip.number_of_images" />

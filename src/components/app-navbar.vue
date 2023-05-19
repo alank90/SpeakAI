@@ -1,7 +1,8 @@
 <template>
   <nav id="nav-container">
-    <img class="navbar-item-one" src="../assets/images/ai_navbar_image_sm.webp" alt="Image of an AI person" />
-
+    <a href="https://platform.openai.com/docs/introduction" target="_blank" title="Goto OpenAI Documentation">
+      <img class="navbar-item-one" src="../assets/images/ai_navbar_image_sm.webp" alt="Image of an AI person" />
+    </a>
     <ul class="navbar-item-two">
       <li class="menu-item"><router-link to="/">Home</router-link></li>
       <li class="menu-item">
