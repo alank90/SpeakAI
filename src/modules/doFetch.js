@@ -71,6 +71,13 @@ const constructFetchOptions = async (optionsForQuery) => {
   return options;
 };
 
+/**
+ * @Description - procedure to fetch response from openAI using native Fetch API
+ * @param {*} url - The fetch url
+ * @param {*} options - fetch options passed along w/api call
+ * @returns { object } - response from openAI server to your prompt
+ */
+
 async function doFetch(url, options) {
   // reset before fetching ..
   imagesURL = null;
