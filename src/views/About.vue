@@ -8,9 +8,8 @@
         OpenAI to signup.</a>
     </p>
     <p>I designed this site to give people the opportunity to aquaint themselves with some of what AI is capable of.
-      There
-      is the main page which allows you to create what are called "prompts" to interact with Chat GPT service and tweak
-      certain of the options available to you for the responses.</p>
+      There is the main page which allows you to create what are called "prompts" to interact with Chat GPT service and
+      tweak certain of the options available to you for the responses.</p>
     <p>DALL-E is an AI system that can create realistic images and art from a description in natural language.<a
         href="https://openai.com/research/dall-e">DALL-E info.</a></p>
   </main>
@@ -71,9 +70,5 @@ a:focus {
 
 footer {
   color: #131313;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
 }
 </style>
