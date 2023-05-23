@@ -18,7 +18,9 @@
       </div>
 
       <div class="card">
-        <div id="ai-conversation"> {{ introText }} {{ aiConversation }} </div>
+        <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
+        <div class="ai-response typewriter">{{ aiResponse }}</div>
+        <div class="ai-conversation"> {{ aiConversation }} </div>
       </div>
 
       <button @click="aiConversation = ''" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
@@ -128,6 +130,7 @@ const askAi = async () => {
     top_p: parseFloat(topP.value),
     max_tokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
+
   };
   btnText.value = "Thinking...🤔";
   // Clear query box
@@ -173,10 +176,12 @@ const askAi = async () => {
       // Add to chat history dialog
       let insertStarterText = starterText();
 
+      aiConversation.value = `${aiQuery.value} \n ${aiResponse.value}`;
+
       aiQuery.value = `🧑 ${content.value}`;
-      aiResponse.value = `🤖 ${data.choices[0].message.content}`;
-      aiConversation.value = insertStarterText ? `${aiQuery.value} \n ${insertStarterText} \n ${aiResponse.value} \n ${aiConversation.value} \n` :
-        `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+      aiResponse.value = insertStarterText ? `${insertStarterText} \n 🤖 ${data.choices[0].message.content}} \n` :
+        `🤖 ${data.choices[0].message.content} \n`;
+
 
       // Update tokens used
       tokensUsed.value += data.usage.total_tokens;
@@ -690,7 +695,9 @@ button svg {
   min-height: 20%;
 }
 
-#ai-conversation {
+.ai-query,
+.ai-response,
+.ai-conversation {
   z-index: 1;
   font-size: 1.2rem;
   font-family: var(--letter-font);
