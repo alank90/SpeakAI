@@ -2,7 +2,8 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <input type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content" clear />
+      <input @keyup.enter="askAi" type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
+        clear />
 
       <div class="button-block">
         <button type="button" @click="askAi" class="btn">
@@ -129,9 +130,16 @@ const askAi = async () => {
     temperature: parseFloat(temperatureValue.value),
     top_p: parseFloat(topP.value),
     max_tokens: parseInt(maxTokens.value),
+    stream: true,
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
-
   };
+
+  // Alert the user if no prompt value
+  if (!content.value) {
+    alert("Please eneter a prompt.");
+    return;
+  }
+
   btnText.value = "Thinking...🤔";
   // Clear query box
   introText.value = "";
@@ -167,26 +175,75 @@ const askAi = async () => {
     body: JSON.stringify(fetchOptions),
   })
     .then((response) => {
-      return response.json();
+      return response.body;
     })
-    .then((data) => {
+    .then(async (data) => {
       if (data.error) {
         throw new Error(data.error.message);
       }
+
+      // -------- Read the response as a stream of data  -------------- //
+
+      // This line initializes a ReadableStreamDefaultReader 
+      // object named reader to read data from the response.body 
+      // in a streaming manner.
+      const reader = data.getReader();
+      const decoder = new TextDecoder("utf-8");
+      aiResponse.value = ""; // Clear response field
+
       // Add to chat history dialog
-      let insertStarterText = starterText();
-
-      aiConversation.value = `${aiQuery.value} \n ${aiResponse.value}`;
-
+      //let insertStarterText = starterText();
       aiQuery.value = `🧑 ${content.value}`;
-      aiResponse.value = insertStarterText ? `${insertStarterText} \n 🤖 ${data.choices[0].message.content}} \n` :
-        `🤖 ${data.choices[0].message.content} \n`;
+
+
+      /* eslint-disable no-constant-condition */
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+
+        // Massage and parse the chunk of data
+        const chunk = decoder.decode(value);
+        console.log(chunk);
+        const lines = chunk.split("\\n");
+        const parsedLines = lines
+          .map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
+          .filter((line) => line !== "" && !line.includes("[DONE]")) // Remove empty lines and "[DONE]"
+          .map((line) => {
+            JSON.parse(line);
+            console.log(line.index);
+          }); // Parse the JSON string
+
+
+
+        /* for (const parsedLine of parsedLines) {
+          const { choices } = parsedLine;
+          const { delta } = choices[0];
+          const { content: responseChunk } = delta;
+          console.log(responseChunk);
+
+          // Update the UI with the new content
+          if (responseChunk) {
+            aiResponse.value += responseChunk;
+          }
+        } */
+
+      } // end of while loop
+
+      // -------- End of reading the response as a stream of data  -------------- //
+
+
+      //aiConversation.value = `${aiQuery.value} \n ${aiResponse.value}`;
+
+      //aiResponse.value = insertStarterText ? `${insertStarterText} \n 🤖 ${data.choices[0].message.content}} \n` :
+      //  `🤖 ${data.choices[0].message.content} \n`;
 
 
       // Update tokens used
-      tokensUsed.value += data.usage.total_tokens;
+      // tokensUsed.value += data.usage.total_tokens;
       // Clear query 
-      content.value = "";
+      // content.value = "";
     })
     .catch((error) => {
       aiConversation.value =
