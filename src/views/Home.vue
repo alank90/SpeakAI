@@ -5,7 +5,12 @@
       <input @keyup.enter="askAi" type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
         clear />
 
+
+
       <div class="button-block">
+        <button type="button" class="btn--cancel">Cancel</button>
+
+
         <button type="button" @click="askAi" class="btn">
           <strong>{{ btnText }}</strong>
           <div id="container-stars">
@@ -20,11 +25,11 @@
 
       <div class="card">
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
-        <div class="ai-response typewriter">{{ aiResponse }}</div>
+        <div class="ai-response">{{ aiResponse }}</div>
         <div class="ai-conversation"> {{ aiConversation }} </div>
       </div>
 
-      <button @click="aiConversation = ''" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
+      <button @click="clearConversation" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
     </div>
 
     <div class="chat-options">
@@ -106,6 +111,7 @@ let topP = ref(0);
 let maxTokens = ref(100);
 let stopSequences = ref([]);
 let theStopSequence = "";
+let askedAiCalledPreviously = false;
 
 const BTN_TEXT = "Submit 🚀";
 const content = ref("");
@@ -133,6 +139,7 @@ const askAi = async () => {
     stream: true,
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
   };
+
 
   // Alert the user if no prompt value
   if (!content.value) {
@@ -182,6 +189,21 @@ const askAi = async () => {
         throw new Error(data.error.message);
       }
 
+      // Construct the response box
+      let insertStarterText = starterText();
+      if (askedAiCalledPreviously) {
+        aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+      } else {
+        askedAiCalledPreviously = true;
+      }
+      aiQuery.value = `🧑 ${content.value}`;
+      aiResponse.value = `🤖 ${insertStarterText}`;
+
+      // Clear the prompt
+      content.value = "";
+      // --------- End construct the response box ----------------- //
+
+
       // -------- Read the response as a stream of data  -------------- //
 
       // This line initializes a ReadableStreamDefaultReader 
@@ -189,12 +211,6 @@ const askAi = async () => {
       // in a streaming manner.
       const reader = data.getReader();
       const decoder = new TextDecoder("utf-8");
-      aiResponse.value = ""; // Clear response field
-
-      // Add to chat history dialog
-      //let insertStarterText = starterText();
-      aiQuery.value = `🧑 ${content.value}`;
-
 
       /* eslint-disable no-constant-condition */
       while (true) {
@@ -205,45 +221,29 @@ const askAi = async () => {
 
         // Massage and parse the chunk of data
         const chunk = decoder.decode(value);
-        console.log(chunk);
-        const lines = chunk.split("\\n");
+        const lines = chunk.split("\n");
+
         const parsedLines = lines
-          .map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
-          .filter((line) => line !== "" && !line.includes("[DONE]")) // Remove empty lines and "[DONE]"
-          .map((line) => {
-            JSON.parse(line);
-            console.log(line.index);
-          }); // Parse the JSON string
+          .map((line) => line.replace(/^data: /, "").trim())
+          .filter((line) => line !== "" && line !== "[DONE]")
+          .map((line) => JSON.parse(line)); // Parse the JSON string
 
-
-
-        /* for (const parsedLine of parsedLines) {
+        // Iterate through each parsed line in the parsedLines array
+        for (const parsedLine of parsedLines) {
           const { choices } = parsedLine;
           const { delta } = choices[0];
           const { content: responseChunk } = delta;
-          console.log(responseChunk);
 
           // Update the UI with the new content
           if (responseChunk) {
             aiResponse.value += responseChunk;
           }
-        } */
+        }
 
       } // end of while loop
 
       // -------- End of reading the response as a stream of data  -------------- //
 
-
-      //aiConversation.value = `${aiQuery.value} \n ${aiResponse.value}`;
-
-      //aiResponse.value = insertStarterText ? `${insertStarterText} \n 🤖 ${data.choices[0].message.content}} \n` :
-      //  `🤖 ${data.choices[0].message.content} \n`;
-
-
-      // Update tokens used
-      // tokensUsed.value += data.usage.total_tokens;
-      // Clear query 
-      // content.value = "";
     })
     .catch((error) => {
       aiConversation.value =
@@ -257,7 +257,9 @@ const askAi = async () => {
       btnText.value = BTN_TEXT;
     });
 };
+// -------------------------------------------------------------------- //
 // ----------------- End of askAI() ----------------------------------- //
+// -------------------------------------------------------------------- //
 
 /**
  * @Description - Called every time character typed in the <textarea>
@@ -328,6 +330,15 @@ const toggleApiOptionsVisibility = () => {
   elArrowRotate.classList.toggle("el-rotate");
 };
 
+/**
+ * @Description - clear the Conversation box
+ */
+
+const clearConversation = () => {
+  aiQuery.value = "";
+  aiResponse.value = "";
+  aiConversation.value = "";
+};
 // -------------------------------------------------------------------------------------- //
 // ----------------------- End of Methods ----------------------------------------------- //
 // -------------------------------------------------------------------------------------- //
@@ -703,6 +714,23 @@ button {
 }
 
 .btn--clear-block:hover {
+  background-color: #ad51b5c4;
+}
+
+.btn--cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100px;
+  margin: 0 10px;
+  padding: 20px;
+  font-size: 1rem;
+  background-color: var(--main-theme-color);
+  align-self: flex-end;
+}
+
+.btn--cancel:hover {
   background-color: #ad51b5c4;
 }
 
