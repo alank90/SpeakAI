@@ -5,12 +5,8 @@
       <input @keyup.enter="askAi" type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
         clear />
 
-
-
       <div class="button-block">
-        <button type="button" class="btn--cancel">Cancel</button>
-
-
+        <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>
         <button type="button" @click="askAi" class="btn">
           <strong>{{ btnText }}</strong>
           <div id="container-stars">
@@ -112,6 +108,9 @@ let maxTokens = ref(100);
 let stopSequences = ref([]);
 let theStopSequence = "";
 let askedAiCalledPreviously = false;
+let cancelButtonVisible = ref(false);
+
+let controller = null; // Store the AbortController instance
 
 const BTN_TEXT = "Submit 🚀";
 const content = ref("");
@@ -150,6 +149,7 @@ const askAi = async () => {
   btnText.value = "Thinking...🤔";
   // Clear query box
   introText.value = "";
+  cancelButtonVisible.value = true;
 
   // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
   if (!decryptedString) {
@@ -159,6 +159,8 @@ const askAi = async () => {
     // Check if db retrieval successful
     if (!dbItems) {
       alert("Failed IndexedDB getItems action.");
+      btnText.value = BTN_TEXT;
+
       return;
     }
     // else, continue
@@ -175,11 +177,16 @@ const askAi = async () => {
     );
   } // end !decryptedString if block
 
-  // ============= API call ===============================
+  // Create a new AbortController instance
+  controller = new AbortController();
+  const signal = controller.signal;
+
+  // ============= Fetch API call ===============================
   await fetch(openAIURL, {
     method: "POST",
     headers: myHeaders,
     body: JSON.stringify(fetchOptions),
+    signal, // Pass the signal to the fetch request
   })
     .then((response) => {
       return response.body;
@@ -246,15 +253,21 @@ const askAi = async () => {
 
     })
     .catch((error) => {
-      aiConversation.value =
-        `I'm sorry. There was a problem with your request at this time. ${error}`;
-      console.error(
-        "There has been a problem with your fetch operation:",
-        error
-      );
+      // Handle fetch request errors
+      if (signal.aborted) {
+        aiResponse.value = "Request aborted.";
+      } else {
+        aiConversation.value =
+          `I'm sorry. There was a problem with your request at this time. ${error}`;
+        console.error(
+          "There has been a problem with your fetch operation:",
+          error
+        );
+      }
     })
     .finally(() => {
       btnText.value = BTN_TEXT;
+      cancelButtonVisible.value = false;
     });
 };
 // -------------------------------------------------------------------- //
@@ -339,6 +352,21 @@ const clearConversation = () => {
   aiResponse.value = "";
   aiConversation.value = "";
 };
+
+/**
+ * @Description - cancels the pending fetch request via 
+ *  the AbortController instance
+ */
+
+const cancelRequest = () => {
+  // Cancel the fetch request by calling abort() on
+  // the AbortController instance
+  if (controller) {
+    controller.abort();
+    controller = null;
+  }
+};
+
 // -------------------------------------------------------------------------------------- //
 // ----------------------- End of Methods ----------------------------------------------- //
 // -------------------------------------------------------------------------------------- //
