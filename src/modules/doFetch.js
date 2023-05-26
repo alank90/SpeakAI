@@ -10,8 +10,15 @@ import { decryptString } from "@/modules/subtleCrypto.js";
 // ======= Variable Declarations ============ //
 let imagesURL = null;
 let decryptedString = null;
-let error = null;
+let error = "Im happy";
 let fetchOptions = null;
+
+let controller = {
+  instance: null, // Store the AbortController instance
+};
+// Create a new AbortController instance
+controller.instance = new AbortController();
+const signal = controller.instance.signal;
 
 // ================ Methods ======================================== //
 /**
@@ -66,6 +73,7 @@ const constructFetchOptions = async (optionsForQuery) => {
     method: "POST",
     headers: myHeaders,
     body: JSON.stringify(dalleOptions),
+    signal, // Pass the signal to the fetch request
   };
 
   return options;
@@ -81,7 +89,6 @@ const constructFetchOptions = async (optionsForQuery) => {
 async function doFetch(url, options) {
   // reset before fetching ..
   imagesURL = null;
-  error = null;
 
   fetchOptions = await constructFetchOptions(options);
 
@@ -90,10 +97,16 @@ async function doFetch(url, options) {
     imagesURL = await res.json();
     return imagesURL;
   } catch (e) {
-    error.value = e;
+    error = e;
+    // Handle fetch request errors
+    if (signal.aborted) {
+      error = "Request aborted.";
+    } else {
+      error = "Error occurred while generating.";
+    }
   }
 }
 
 // ============== Exports ============================ //
 
-export { doFetch, error };
+export { doFetch, error, controller };

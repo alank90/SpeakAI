@@ -12,6 +12,8 @@
                 <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
                     v-model="dalleQuery" clear />
                 <button @click="fetchImages" class="btn--image-query">Query</button>
+                <button @click="cancelRequest" class="btn--image-query">Cancel</button>
+
             </div>
 
             <p v-if="loading" class="loading">Retrieving images...</p>
@@ -56,7 +58,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { doFetch } from "@/modules/doFetch.js";
+import { doFetch, error, controller } from "@/modules/doFetch.js";
 import tooltip from "@/modules/useTooltip.js";
 
 
@@ -82,6 +84,7 @@ let queryOptions = ref({
 // ============== Methods ======================== //
 // ==== Fetch images ==== //
 const fetchImages = async () => {
+    console.log(error);
     loading.value = true;
 
     // Clear the currentImages array
@@ -114,7 +117,6 @@ const fetchImages = async () => {
                 const index = elParent.dataset.imageArray;
 
                 if (elParent.classList.contains("container--history-img")) {
-                    console.log('in event if');
                     // Replace currentImages array elements w/contents 
                     // of the imagesHistoryItems array
                     currentImages.value.data = imagesHistory.value[index];
@@ -165,6 +167,22 @@ const clearImagesHistory = () => {
     dalleQuery.value = "";
 };
 
+/**
+ * Description - cancel fetch request
+ */
+
+const cancelRequest = () => {
+    // Abort the fetch request by calling abort() on the AbortController instance
+    if (controller) {
+        console.log(error);
+        controller.instance.abort();
+        controller.instance = null;
+        console.log(error);
+    }
+
+    loading.value = false;
+
+};
 
 // ----------------------------------------------------------------------------------------------  //
 

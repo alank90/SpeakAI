@@ -21,7 +21,7 @@
 
       <div class="card">
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
-        <div class="ai-response">{{ aiResponse }}</div>
+        <div class="ai-response"> {{ aiResponse }}</div>
         <div class="ai-conversation"> {{ aiConversation }} </div>
       </div>
 
