@@ -9,23 +9,26 @@
         <div class="container--query">
             <p class="description">Start with a detailed decription</p>
             <div class="container--btn">
-                <input type="text" class="input" placeholder="An Impressionist oil painting of sunflowers in a purple vase"
-                    v-model="dalleQuery" clear />
-                <button @click="fetchImages" class="btn--image-query">Query</button>
-                <button @click="cancelRequest" class="btn--image-query">Cancel</button>
-
+                <input @keyup.enter="fetchImages" type="text" class="input"
+                    placeholder="An Impressionist oil painting of sunflowers in a purple vase" v-model="dalleQuery" clear />
+                <button v-if="!loading" @click="fetchImages" class="btn--image-query">Query</button>
+                <button v-if="loading" @click="cancelRequest" class="btn--image-query">Cancel</button>
             </div>
 
             <p v-if="loading" class="loading">Retrieving images...</p>
+            <p v-if="error"> {{ error }}</p>
+            <p v-if="!imagesURL">{{ introText }}</p>
+
+
         </div>
 
 
-        <div @click="swapOutRetrievedImages" v-if="currentImages" class="container--img">
-            <a v-for="(item, index) in currentImages.data" :key="index">
+        <div @click="swapOutRetrievedImages" v-if="imagesURL" class="container--img">
+            <a v-for="(item, index) in imagesURL.data" :key="index">
                 <img :src="item.url" alt="An AI Generated Picture">
-                {{ introText }}
+
             </a>
-            <p v-if="currentImages.error"> {{ currentImages.error.message }}</p>
+            <p v-if="error"> {{ error }}</p>
         </div>
 
         <div class="container--history">
@@ -58,14 +61,13 @@
 
 <script setup>
 import { ref } from "vue";
-import { doFetch, error, controller } from "@/modules/doFetch.js";
+import { doFetch, error, controller, imagesURL } from "@/modules/doFetch.js";
 import tooltip from "@/modules/useTooltip.js";
 
 
 // ========= Vars ========================== //
 const dalleURL = `https://api.openai.com/v1/images/generations`;
 const dalleQuery = ref("");
-let currentImages = ref(null);
 let imagesHistory = ref([]);
 let imagesToGenerate = ref(1);
 let pictureSize = ref("256x256");
@@ -84,16 +86,32 @@ let queryOptions = ref({
 // ============== Methods ======================== //
 // ==== Fetch images ==== //
 const fetchImages = async () => {
-    console.log(error);
+    // Alert the user if no prompt value
+    if (!dalleQuery.value) {
+        alert("Please eneter a prompt.");
+        return;
+    }
+
     loading.value = true;
 
-    // Clear the currentImages array
-    currentImages.value = null;
+    // Clear the imagesURL array 
+    imagesURL.value = null;
 
     // do fetch to openAI endpoint
-    currentImages.value = await doFetch(dalleURL, queryOptions);
+    await doFetch(dalleURL, queryOptions);
+    // check if request failed or aborted
+    if (error.value) {
+        loading.value = false;
+        introText.value = "";
+        if (imagesHistory.value.length > 0) {
+            // push the results onto start of the imagesHistory array
+            imagesHistory.value.unshift(imagesURL.value.data);
+        }
+        return;
+    }
+
     // push the results onto start of the imagesHistory array
-    imagesHistory.value.unshift(currentImages.value.data);
+    imagesHistory.value.unshift(imagesURL.value.data);
 
     loading.value = false;
     introText.value = "";
@@ -104,7 +122,7 @@ const fetchImages = async () => {
 
 
     // Add event listener to container--history 
-    // for inserting a history-image array into currentImages array
+    // for inserting a history-image array into imagesURL array
     // when user clicks on a row of images in the imagesHistory container
     const el = document.querySelector(".container--body");
 
@@ -113,13 +131,13 @@ const fetchImages = async () => {
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
             const elParent = elClicked.parentElement;
-            if (elParent.hasAttribute("data-image-array") || elParent.classList.contains("container--img")) {
+            if (elParent?.hasAttribute("data-image-array") || elParent?.classList.contains("container--img")) {
                 const index = elParent.dataset.imageArray;
 
                 if (elParent.classList.contains("container--history-img")) {
-                    // Replace currentImages array elements w/contents 
+                    // Replace imagesURL array elements w/contents 
                     // of the imagesHistoryItems array
-                    currentImages.value.data = imagesHistory.value[index];
+                    imagesURL.value.data = imagesHistory.value[index];
                 } else if (elParent.classList.contains("container--img")) {
                     elClicked.classList.toggle("scale-element");
                 }
@@ -159,7 +177,7 @@ const optionsVisibility = () => {
  */
 const clearImagesHistory = () => {
     imagesHistory.value = [];
-    currentImages.value = null;
+    imagesURL.value = null;
 
     const el = document.querySelector(".container--body");
     el.style.gridTemplateColumns = "";
@@ -174,10 +192,8 @@ const clearImagesHistory = () => {
 const cancelRequest = () => {
     // Abort the fetch request by calling abort() on the AbortController instance
     if (controller) {
-        console.log(error);
         controller.instance.abort();
         controller.instance = null;
-        console.log(error);
     }
 
     loading.value = false;

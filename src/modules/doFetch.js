@@ -1,3 +1,4 @@
+import { ref } from "vue";
 import { getDBHandle, getDBItems } from "@/modules/indexedDBStorage.js";
 import { decryptString } from "@/modules/subtleCrypto.js";
 
@@ -8,9 +9,9 @@ import { decryptString } from "@/modules/subtleCrypto.js";
  * @importedBy - DallE.vue
  */
 // ======= Variable Declarations ============ //
-let imagesURL = null;
+let imagesURL = ref(null);
 let decryptedString = null;
-let error = "Im happy";
+let error = ref(null);
 let fetchOptions = null;
 
 let controller = {
@@ -62,7 +63,7 @@ const constructFetchOptions = async (optionsForQuery) => {
   // Append new authorization header onto myHeaders if initial chat request for session.
   myHeaders.append("Authorization", `Bearer ${decryptedString}`);
 
-  // Fetch scores
+  // Create a Fetch options for DALL-E api query
   const dalleOptions = {
     prompt: optionsForQuery.value.query,
     n: parseInt(optionsForQuery.value.n),
@@ -73,7 +74,7 @@ const constructFetchOptions = async (optionsForQuery) => {
     method: "POST",
     headers: myHeaders,
     body: JSON.stringify(dalleOptions),
-    signal, // Pass the signal to the fetch request
+    signal, // Pass the AbortController() signal to the fetch request
   };
 
   return options;
@@ -88,25 +89,24 @@ const constructFetchOptions = async (optionsForQuery) => {
 
 async function doFetch(url, options) {
   // reset before fetching ..
-  imagesURL = null;
+  imagesURL.value = null;
 
   fetchOptions = await constructFetchOptions(options);
 
   try {
     const res = await fetch(url, fetchOptions);
-    imagesURL = await res.json();
-    return imagesURL;
+    imagesURL.value = await res.json();
   } catch (e) {
-    error = e;
+    error.value = e;
     // Handle fetch request errors
     if (signal.aborted) {
-      error = "Request aborted.";
+      error.value = `${e} -  Request aborted.`;
     } else {
-      error = "Error occurred while generating.";
+      error.value = `Error occurred while generating. ${e}`;
     }
   }
 }
 
 // ============== Exports ============================ //
 
-export { doFetch, error, controller };
+export { doFetch, imagesURL, error, controller };
