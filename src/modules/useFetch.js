@@ -87,7 +87,7 @@ const constructFetchOptions = async (optionsForQuery) => {
  * @returns { object } - response from openAI server to your prompt
  */
 
-async function doFetch(url, options) {
+async function useFetch(url, options) {
   // reset before fetching ..
   imagesURL.value = null;
 
@@ -109,4 +109,4 @@ async function doFetch(url, options) {
 
 // ============== Exports ============================ //
 
-export { doFetch, imagesURL, error, controller };
+export { useFetch, imagesURL, error, controller };

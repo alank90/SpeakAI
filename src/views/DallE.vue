@@ -24,7 +24,7 @@
 
 
         <div @click="swapOutRetrievedImages" v-if="imagesURL" class="container--img">
-            <a v-for="(item, index) in imagesURL.data" :key="index">
+            <a v-for="(item, index) in imagesURL.data" :key="index" class="anchor-img-container">
                 <img :src="item.url" alt="An AI Generated Picture">
 
             </a>
@@ -61,7 +61,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { doFetch, error, controller, imagesURL } from "@/modules/doFetch.js";
+import { useFetch, error, controller, imagesURL } from "@/modules/useFetch.js";
 import tooltip from "@/modules/useTooltip.js";
 
 
@@ -98,7 +98,7 @@ const fetchImages = async () => {
     imagesURL.value = null;
 
     // do fetch to openAI endpoint
-    await doFetch(dalleURL, queryOptions);
+    await useFetch(dalleURL, queryOptions);
     // check if request failed or aborted
     if (error.value) {
         loading.value = false;
@@ -131,14 +131,15 @@ const fetchImages = async () => {
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
             const elParent = elClicked.parentElement;
-            if (elParent?.hasAttribute("data-image-array") || elParent?.classList.contains("container--img")) {
+            console.log(elParent);
+            if (elParent?.hasAttribute("data-image-array") || elParent?.classList.contains("anchor-img-container")) {
                 const index = elParent.dataset.imageArray;
 
                 if (elParent.classList.contains("container--history-img")) {
                     // Replace imagesURL array elements w/contents 
                     // of the imagesHistoryItems array
                     imagesURL.value.data = imagesHistory.value[index];
-                } else if (elParent.classList.contains("container--img")) {
+                } else if (elParent.classList.contains("anchor-img-container")) {
                     elClicked.classList.toggle("scale-element");
                 }
             }
@@ -149,9 +150,9 @@ const fetchImages = async () => {
 };
 
 
-// ======= Toggle display of History column ============ //
+// ======= Toggle display of Options column ============ //
 /**
- * @Description - Function to hide/show the previous pictures queried
+ * @Description - Function to hide/show the options
  *  column
  */
 const optionsVisibility = () => {
@@ -266,6 +267,7 @@ h2 {
 .btn.btn-clear {
     margin: 10px 10px;
     width: 40%;
+    min-width: 75px;
 }
 
 
@@ -327,6 +329,7 @@ img[alt="An AI Generated Picture"].scale-element {
 .container--history {
     grid-area: history;
     position: relative;
+
 }
 
 .container--history-img {
@@ -334,7 +337,7 @@ img[alt="An AI Generated Picture"].scale-element {
     flex-flow: row nowrap;
     gap: 5px;
     max-width: 25%;
-    margin-bottom: 2px;
+    margin-bottom: 5px;
 }
 
 .container--history-img>img {
