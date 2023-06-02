@@ -26,8 +26,8 @@
         <div @click="swapOutRetrievedImages" v-if="imagesURL" class="container--img">
             <a v-for="(item, index) in imagesURL.data" :key="index" class="anchor-img-container">
                 <img :src="item.url" alt="An AI Generated Picture">
-
             </a>
+
             <p v-if="error"> {{ error }}</p>
         </div>
 
@@ -131,7 +131,7 @@ const fetchImages = async () => {
         el.addEventListener("click", (e) => {
             const elClicked = e.target;
             const elParent = elClicked.parentElement;
-            console.log(elParent);
+
             if (elParent?.hasAttribute("data-image-array") || elParent?.classList.contains("anchor-img-container")) {
                 const index = elParent.dataset.imageArray;
 
@@ -280,7 +280,9 @@ h2 {
         "query query history arrow options"
         "results results results results results";
     gap: 20px 10px;
-    margin-top: 6%;
+    margin: 5% auto;
+    width: 80vw;
+    max-width: 1200px;
     justify-items: stretch;
     align-items: flex-start;
     transition: all 0.3s ease-in;
@@ -322,8 +324,12 @@ img[alt="An AI Generated Picture"].scale-element {
     top: 0;
     bottom: 0;
     margin: auto;
-    transform: scale(3);
+    transform: scale(2.5);
     z-index: 9999;
+    border: 1.4px solid var(--main-theme-color);
+    border-radius: 4px;
+    transition: all 1.1s linear;
+
 }
 
 .container--history {

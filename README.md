@@ -1,31 +1,21 @@
-# Vue 3 + Vite + vite-setup.cmd
+# SpeakAi
 
-&nbsp;&nbsp;This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more. It is designed to be cloned from the command line by the _vite-setup.cmd_ script.
-&nbsp;&nbsp;The _vite-setup.cmd_ script will download this file from Github and install all the dependencies. It will also add a remote repo for your new project and push it to Github. The added benefit of using vite-setup is that the **eslintrc.js** & **prettierrc.js** config files are also downloaded and configured with standard defaults.
+&nbsp;&nbsp;This app is a spinoff of the playground
+page on the OpenAI site. It also incorporates a _/dalle_ page to generate pictures from prompts. We use Vue 3 with Vue router to implement an SPA.
 
-### vite-setup.cmd requirements
-&nbsp;&nbsp;[Github CLI](https://github.com/cli/cli) (e.g.,**gh**) is GitHub on the command line. It brings pull requests, issues, and other GitHub concepts to the terminal next to where you are already working with git and your code. It enables us to create a _remote repo_ of the cloned vite project. This is done in the ***vite-setup*** script so you dont have to create a remote repo of your new project yourself.
+_Note_ - For a good writeup on how we streamed the completions from OpenAI /completions endpoint see the article [Stream OpenAI Chat Completions in JavaScript](https://www.builder.io/blog/stream-ai-javascript).
 
-&nbsp;&nbsp;The easiest way to install _gh_ is thru chocolaty. At admin command line issue -
+## Requirements
 
-_choco install gh_
+- [idb](https://www.npmjs.com/package/idb) - This is a tiny (~1.06kB brotli'd) library that mostly mirrors the IndexedDB API, but with small improvements that make a big difference to usability.
 
-&nbsp;&nbsp;We also use the _npm-check-updates_ to update all packages to latest versions for each new project. To update all of our package dependencies in package.json (excluding our “vue” package), we would do the following:
-
-_ncu --upgrade_
-
-_npm install_
-
-&nbsp;&nbsp;Unfortunately as of this writing we also have to run _npm install vue@next_ seperately to insure latest version of vue is installed for the new project.
+- [floating-vue](https://floating-vue.starpad.dev/) - A tooltips and dropdowns library.
 
 ### Deploying to Netlify
-- ***npm run build***
 
-- ***netlify init*** (Follow the prompts to add a project to netlify.)
+- **_npm run build_**
 
-- ***netlify env:import .env*** (If necessary. You must then rebuild the project to add the environment 
+- **_netlify init_** (Follow the prompts to add a project to netlify.)
+
+- **_netlify env:import .env_** (If necessary. You must then rebuild the project to add the environment
   variables to your project.)
-
-
-
-

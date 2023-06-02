@@ -385,6 +385,9 @@ h1 {
   grid-template-areas: "chat options";
   column-gap: 25px;
   justify-content: center;
+  width: 80vw;
+  max-width: 1200px;
+  margin: 0 auto;
   transition: all .4s ease-out;
 }
 
