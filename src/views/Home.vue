@@ -119,6 +119,7 @@ const aiResponse = ref("");
 const aiConversation = ref("");
 const introText = ref("📖 The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
+let componentKey = ref(0);
 
 const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
 
@@ -365,6 +366,8 @@ const cancelRequest = () => {
   if (controller) {
     controller.abort();
     controller = null;
+
+    componentKey.value += 1;
   }
 };
 

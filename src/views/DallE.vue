@@ -78,6 +78,7 @@ let queryOptions = ref({
     n: imagesToGenerate,
     size: pictureSize,
 });
+let componentKey = ref(0);
 
 // ============ End of Vars declarations ======== //
 
@@ -198,6 +199,7 @@ const cancelRequest = () => {
     }
 
     loading.value = false;
+    componentKey.value += 1;
 
 };
 
