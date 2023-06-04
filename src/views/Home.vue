@@ -341,6 +341,7 @@ const toggleApiOptionsVisibility = () => {
   elGridContainer.classList.toggle("el-col-width");
   el.classList.toggle("el-height");
   elArrowRotate.classList.toggle("el-rotate");
+
 };
 
 /**
@@ -412,6 +413,8 @@ h1 {
 
 .el-height {
   opacity: 0;
+  /* disables :hover so no tooltip effects */
+  pointer-events: none;
 }
 
 .arrow {
