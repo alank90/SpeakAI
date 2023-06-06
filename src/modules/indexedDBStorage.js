@@ -69,7 +69,7 @@ async function getDBItems(db) {
   // First check if store exists
   if (!db.objectStoreNames.contains(storeName)) {
     alert(
-      "It doesn't look like you have an API key registered. Please check and add one."
+      "It doesn't look like you have an API key registered. Please refresh your browser and then add one."
     );
 
     return null;
