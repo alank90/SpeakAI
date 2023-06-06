@@ -2,8 +2,8 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <input @keyup.enter="askAi" type="text" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
-        clear />
+      <textarea type="text" rows="2" cols="70" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
+        clear></textarea>
 
       <div class="button-block">
         <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>

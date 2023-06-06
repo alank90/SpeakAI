@@ -12,6 +12,10 @@
       tweak certain of the options available to you for the responses.</p>
     <p>DALL-E is an AI system that can create realistic images and art from a description in natural language.<a
         href="https://openai.com/research/dall-e">DALL-E info.</a></p>
+    <p><em>Note</em> - Storing API keys, even though encrypted, in the browser is inherently insecure. This site is
+      intended only
+      to get you started designing prompts in chatGPT. Since most people will only be using the free account this
+      mitigates your exposure somewhat. </p>
   </main>
 
   <footer class="page-footer">&copy; 2023 by <a href="https://alank-portfolio.netlify.app/" target="_blank">Alan
