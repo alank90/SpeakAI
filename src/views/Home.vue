@@ -445,7 +445,6 @@ h1 {
 
 .input {
   width: calc(85% - 20px);
-  height: 32px;
   padding: 12px;
   border: none;
   border-radius: 16px;
