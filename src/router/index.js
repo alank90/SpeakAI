@@ -15,6 +15,11 @@ const routes = [
     component: () => import("@/views/About.vue"), // Lazy loading this route
   },
   {
+    path: "/intro",
+    name: "Intro",
+    component: () => import("@/views/IntroChatGPT.vue")
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
     component: () => import("@/views/NotFound.vue"),

@@ -8,6 +8,9 @@
       <li class="menu-item">
         <router-link to="/dalle">DALL-E</router-link>
       </li>
+      <li class="menu-item">
+        <router-link to="/intro">Primer to ChatGPT</router-link>
+      </li>
       <li class="menu-item" title="Goto GPTZero to check if text was AI generated"><a
           href="https://app.gptzero.me/app/welcome" target="_blank">GPTZero</a></li>
       <li class="menu-item"><router-link to="/about">About</router-link></li>
