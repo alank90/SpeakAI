@@ -2,7 +2,7 @@
       <h1 class="page-header">Intro to SpeakAI</h1>
 
       <main class="page-body">
-            <div class="intro">
+            <div class="intro page" v-if="pageNumber === 1">
                   <p>The first prompt provides a starting point or direction for ChatGPT. The response follows the same tone,
                         context, and style as the prompt. Here are some general rules for writing prompts for ChatGPT-3.5:
                   </p>
@@ -22,13 +22,13 @@
 
                         <p>With the following prompt:</p>
                         <code>
-                                                                                    Create a list of 10 fun and inexpensive toy gifts 
-                                                                                    to programmers based on the following criteria:
-                                                                                    - It should be useful
-                                                                                    - It should be silly
-                                                                                    - It should spark creativity 
+                                                                                                                                                                                                                                                                                                      Create a list of 10 fun and inexpensive toy gifts 
+                                                                                                                                                                                                                                                                                                      to programmers based on the following criteria:
+                                                                                                                                                                                                                                                                                                      - It should be useful
+                                                                                                                                                                                                                                                                                                      - It should be silly
+                                                                                                                                                                                                                                                                                                      - It should spark creativity 
                                     
-                                                                              </code>
+                                                                                                                                                                                                                                                                                                </code>
 
 
                         <p>A response from Generative AI could be:</p>
@@ -36,26 +36,26 @@
                   </section>
             </div>
 
-            <div class="roles">
+            <div class="roles page" v-if="pageNumber === 2">
                   <h2>ChatGPT-3.5 Role Prompting</h2>
-                  <p>A simple way to add context to a prompt is to assign a role to ChatGPT.For example, your prompt can start
+                  <p>A simple way to add context to a prompt is to assign a role to ChatGPT. For example, your prompt can
+                        start
                         with "You are a lawyer" or "You are a Poet", then ask your question</p>
 
                   <section>
                         <h3>Example</h3>
                         With the following prompt:
-                        <code>             You are a poet. Respond to the 
-                                                                                            following:
-                                                                                            "Explain the most important way
-                                                                                            ChatGPT can help me. The answer 
-                                                                                            should be no more than 100 words." 
-                                                                                          </code>
+                        <code> You are a poet. Respond to the following:
+                                     "Explain the most important way
+                                      ChatGPT can help me. The answer 
+                                      should be no more than 100 words." 
+                              </code>
                         A response from ChatGPT-3.5 could be:
                         <img src="@/assets/images/img_roles_poet.webp" alt="A ChatGPT Response">
                   </section>
             </div>
 
-            <div class="shot">
+            <div class="shot page" v-if="pageNumber === 3">
                   <h2>ChatGPT-3.5 Few Shot Prompting</h2>
 
                   <p>Use a few explicit examples (or shots) to guide the AI to respond in a specific way. This is called "Few
@@ -79,17 +79,49 @@
                   </section>
             </div>
 
-            <div class="prompts">
-                  {{ promptsJSON }}
+            <div class="prompts page" v-if="pageNumber === 4">
+                  <h2>Golden Prompts</h2>
+                  <p> Below is a table of examples of golden prompts that you can use.</p>
+
+                  <table class="styled-table">
+                        <thead>
+                              <tr>
+                                    <th>Action</th>
+                                    <th>Golden Prompt</th>
+                              </tr>
+                        </thead>
+
+                        <tbody>
+                              <tr v-for="  item  in  goldenPrompts" class="active-row" :key="item.act">
+                                    <td>{{ item.act }}</td>
+                                    <td>{{ item.prompt }}</td>
+                              </tr>
+                        </tbody>
+
+                  </table>
             </div>
 
 
       </main>
+
+      <footer class="page-footer">
+            <span @click="pageNumber > 2 ? pageNumber-- : pageNumber = 4" class="left">&lt;</span>{{ pageNumber }}<span
+                  @click="pageNumber < 4 ? pageNumber++ : pageNumber = 1" class="right">&gt;</span>
+      </footer>
 </template>
 
-<script scoped>
-// eslint-disable-next-line no-unused-vars
-import { promptsJSON } from '@/modules/useParsePrompts';
+<script setup>
+import { ref } from "vue";
+import prompts from "@/assets/prompts.json";
+
+// Vars
+let goldenPrompts = ref([]);
+let pageNumber = ref(1);
+
+goldenPrompts.value = prompts;
+
+// --------------- Methods ------------------------------------- //
+
 
 </script>
 
@@ -172,5 +204,82 @@ section code {
 img {
       width: 95%;
       margin: 0 auto;
+}
+
+.page {
+      margin-bottom: 5%;
+}
+
+
+/*----------- Table stylings --------------- */
+.styled-table {
+      border-collapse: collapse;
+      margin: 25px auto;
+      font-size: 1rem;
+      font-family: var(--letter-font);
+      min-width: 400px;
+      max-width: 1100px;
+      -webkit-box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
+      -moz-box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
+      box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
+}
+
+.styled-table thead tr {
+      background-color: #009879;
+      color: #ffffff;
+      text-align: left;
+      font-size: 1.2rem;
+}
+
+.styled-table th,
+.styled-table td {
+      padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+      border-bottom: 1px solid #dddddd;
+      font-size: .1.1rem;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+      background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+      border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr:nth-child(odd) {
+      font-weight: bold;
+      color: var(--letter-ai-color);
+      background-color: #e5f4e9;
+}
+
+.styled-table tbody tr:nth-child(odd):hover {
+      background-color: #91eca99a;
+}
+
+.styled-table tbody tr:nth-child(even) {
+      font-weight: bold;
+      color: var(--letter-ai-color);
+      background-color: #cfebd7;
+}
+
+.styled-table tbody tr:nth-child(even):hover {
+      background-color: #70ec93a4;
+
+}
+
+/* End table stylings */
+
+.page-footer {
+      font-size: 1.6rem;
+}
+
+.page-footer span {
+      font-size: 1.6rem;
+      padding: 0 35px;
+      margin-bottom: 20px;
+      cursor: pointer;
 }
 </style>

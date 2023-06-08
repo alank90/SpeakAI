@@ -119,7 +119,7 @@ const fetchImages = async () => {
 
     // Reconfigure container--body grid for container--history being filled
     const elGrid = document.querySelector(".container--body");
-    elGrid.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 20%";
+    elGrid.style.gridTemplateColumns = "repeat(2, 25%) 30px 20% 25%";
 
 
     // Add event listener to container--history 
@@ -166,9 +166,9 @@ const optionsVisibility = () => {
     el.classList.toggle("container--options-visibility");
     elArrow.classList.toggle("arrow-rotate");
     if (el.classList.contains("container--options-visibility")) {
-        el.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 0";
+        el.style.gridTemplateColumns = "repeat(2, 25%)  30px 0 25%";
     } else {
-        el.style.gridTemplateColumns = "repeat(2, 25%) 25% 30px 20%";
+        el.style.gridTemplateColumns = "repeat(2, 25%)  30px 20% 25%";
     }
 };
 
@@ -183,7 +183,7 @@ const clearImagesHistory = () => {
 
     const el = document.querySelector(".container--body");
     el.style.gridTemplateColumns = "";
-    el.style.gridTemplateColumns = "grid-template-columns: repeat(2, 25%) 0 30px 20%";
+    el.style.gridTemplateColumns = "grid-template-columns: repeat(2, 25%)  30px 20% 0";
     dalleQuery.value = "";
 };
 
@@ -276,11 +276,11 @@ h2 {
 /* ====== Grid Container ============== */
 .container--body {
     display: grid;
-    grid-template-columns: repeat(2, 25%) 0 30px 20%;
+    grid-template-columns: repeat(2, 25%) 30px 20% 0;
     grid-template-rows: minmax(0, auto) auto;
     grid-template-areas:
-        "query query history arrow options"
-        "results results results results results";
+        "query query  arrow options history"
+        "results results results results .";
     gap: 20px 10px;
     margin: 5% auto;
     width: 80vw;
