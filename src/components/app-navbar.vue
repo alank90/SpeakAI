@@ -60,6 +60,6 @@ li {
 
 li:hover {
   text-decoration-color: var(--main-theme-color);
-  background-size: 75% 0.1em;
+  background-size: 90% 0.1em;
 }
 </style>

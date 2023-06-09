@@ -16,4 +16,6 @@ export default ref({
   number_of_images: "The number of images requested.",
   image_size: "Size of images returned.",
   mode: "Given a prompt, the model will return one or more predicted completions.",
+  previous: "previous",
+  next: "next",
 });

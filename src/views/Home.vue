@@ -831,6 +831,11 @@ button svg {
   overflow-y: auto;
 }
 
+
+.ai-response:nth-child(2) {
+  background-color: #ebdbf4;
+}
+
 .card::before {
   content: "";
   position: absolute;

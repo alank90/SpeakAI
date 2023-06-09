@@ -22,13 +22,16 @@
 
                         <p>With the following prompt:</p>
                         <code>
-                                                                                                                                                                                                                                                                                                      Create a list of 10 fun and inexpensive toy gifts 
-                                                                                                                                                                                                                                                                                                      to programmers based on the following criteria:
-                                                                                                                                                                                                                                                                                                      - It should be useful
-                                                                                                                                                                                                                                                                                                      - It should be silly
-                                                                                                                                                                                                                                                                                                      - It should spark creativity 
-                                    
-                                                                                                                                                                                                                                                                                                </code>
+                                                                                    Create a list of 10 fun and inexpensive toy gifts 
+                                                                                    to programmers based on the following criteria:
+                                                                        <br/>
+                                                                                    - It should be useful
+                                                                        <br/>
+                                                                                    - It should spark creativity 
+                                                                        <br/>
+                                                                                    - It should be silly
+                                                                        </code>
+
 
 
                         <p>A response from Generative AI could be:</p>
@@ -46,10 +49,10 @@
                         <h3>Example</h3>
                         With the following prompt:
                         <code> You are a poet. Respond to the following:
-                                     "Explain the most important way
-                                      ChatGPT can help me. The answer 
-                                      should be no more than 100 words." 
-                              </code>
+                                                                                           "Explain the most important way
+                                                                                            ChatGPT can help me. The answer 
+                                                                                            should be no more than 100 words." 
+                                                                                    </code>
                         A response from ChatGPT-3.5 could be:
                         <img src="@/assets/images/img_roles_poet.webp" alt="A ChatGPT Response">
                   </section>
@@ -66,14 +69,14 @@
                         <p>With the following prompt:</p>
                         <p>A conversation between Kai, the author of a GPT-3.5 tutorial, and a student:</p>
                         <code>
-                                    Student: Why should I learn about Prompt Engineering?
-                                    Kai: Because Generative AI can really boost your productivity if used correctly, and knowing how to write prompts correctly is the key to helping you use generative AIs.
-                                    Student: What will I learn from this tutorial?
-                                    Kai: This tutorial gives step-by-step guides on how to write AI prompts to get the best possible results from ChatGPT-3.5. You will learn to understand ChatGPT-3.5's capabilities and write prompts that minimize misinformation and biased results.
-                                    Student: That sounds interesting. Can you give me an example of how Prompt Engineering can be used in real-world applications?
-                                    Kai: Prompt Engineering can be used in a wide range of applications, such as content creation, customer service, and even scientific research. For example, let's say you're running a content creation platform and want to generate engaging article titles for your writers. Using Prompt Engineering techniques, you can write prompts that will help create article titles that are attention-grabbing and relevant to your readers. Another example is using generative AI to answer customer service inquiries. By writing well-crafted prompts, you can ensure that the AI responses are accurate and helpful, leading to higher customer satisfaction.
-                                    Student:
-                              </code>
+                              Student: Why should I learn about Prompt Engineering?<br/>
+                              Kai: Because Generative AI can really boost your productivity if used correctly, and knowing how to write prompts correctly is the key to helping you use generative AIs.<br/>
+                              Student: What will I learn from this tutorial?<br/>
+                              Kai: This tutorial gives step-by-step guides on how to write AI prompts to get the best possible results from ChatGPT-3.5. You will learn to understand ChatGPT-3.5's capabilities and write prompts that minimize misinformation and biased results.<br/>
+                              Student: That sounds interesting. Can you give me an example of how Prompt Engineering can be used in real-world applications?,<br/>
+                              Kai: Prompt Engineering can be used in a wide range of applications, such as content creation, customer service, and even scientific research. For example, let's say you're running a content creation platform and want to generate engaging article titles for your writers. Using Prompt Engineering techniques, you can write prompts that will help create article titles that are attention-grabbing and relevant to your readers. Another example is using generative AI to answer customer service inquiries. By writing well-crafted prompts, you can ensure that the AI responses are accurate and helpful, leading to higher customer satisfaction.<br/>
+                              Student:<br/>
+                        </code>
                         <p>A response from ChatGPT-3.5 could be:</p>
                         <img src="@/assets/images/img_shot.webp" alt="ChatGPT Response">
                   </section>
@@ -81,7 +84,7 @@
 
             <div class="prompts page" v-if="pageNumber === 4">
                   <h2>Golden Prompts</h2>
-                  <p> Below is a table of examples of golden prompts that you can use.</p>
+                  <p> Below is a table of examples of golden prompts.</p>
 
                   <table class="styled-table">
                         <thead>
@@ -105,13 +108,13 @@
       </main>
 
       <footer class="page-footer">
-            <span @click="pageNumber > 2 ? pageNumber-- : pageNumber = 4" class="left">&lt;</span>{{ pageNumber }}<span
-                  @click="pageNumber < 4 ? pageNumber++ : pageNumber = 1" class="right">&gt;</span>
+            <span @click="pageNumber > 2 ? pageNumber-- : pageNumber = 4" class="left" title="Prev">&lt;</span>{{
+                  pageNumber }}<span @click="pageNumber < 4 ? pageNumber++ : pageNumber = 1" class="right" title="Next">&gt;</span>
       </footer>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import prompts from "@/assets/prompts.json";
 
 // Vars
@@ -121,6 +124,10 @@ let pageNumber = ref(1);
 goldenPrompts.value = prompts;
 
 // --------------- Methods ------------------------------------- //
+
+watch(pageNumber, () => {
+      window.scrollTo(0, 0);
+});
 
 
 </script>
@@ -142,7 +149,7 @@ h2 {
 }
 
 p {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       max-width: 700px;
       margin: 20px auto;
       font-weight: 600;

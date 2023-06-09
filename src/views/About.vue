@@ -35,7 +35,6 @@ p {
   margin: 20px auto;
   font-weight: 600;
   text-align: left;
-  text-align-last: center;
   text-indent: 40px;
 }
 

@@ -277,10 +277,10 @@ h2 {
 .container--body {
     display: grid;
     grid-template-columns: repeat(2, 25%) 30px 20% 0;
-    grid-template-rows: minmax(0, auto) auto;
+    grid-template-rows: minmax(75px, 175px) auto;
     grid-template-areas:
-        "query query  arrow options history"
-        "results results results results .";
+        "query query  arrow options ."
+        "results results results results history";
     gap: 20px 10px;
     margin: 5% auto;
     width: 80vw;
@@ -337,6 +337,7 @@ img[alt="An AI Generated Picture"].scale-element {
 .container--history {
     grid-area: history;
     position: relative;
+    margin-top: -15%;
 
 }
 
