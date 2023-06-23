@@ -204,7 +204,7 @@ const askAi = async () => {
   const memory = new BufferMemory();
   const chain = new ConversationChain({ llm: model, memory: memory });
 
-  const response = await model.call(content.value);
+  const response = await chain.call({ input: content.value });
 
   console.log(response);
 
