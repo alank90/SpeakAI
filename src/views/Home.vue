@@ -93,6 +93,11 @@ import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
 
+/* LangChain Imports */
+import { OpenAI } from "langchain/llms/openai";
+import { BufferMemory } from "langchain/memory";
+import { ConversationChain } from "langchain/chains";
+
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
@@ -104,7 +109,7 @@ let chatMode = ref("chat/completions");
 let decryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
-let maxTokens = ref(100);
+let maxTokens = ref(300);
 let stopSequences = ref([]);
 let theStopSequence = "";
 let askedAiCalledPreviously = false;
@@ -129,21 +134,16 @@ const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
  *  to the OpenAI /completions endpoint.
  */
 const askAi = async () => {
+
   // Vars
-  const fetchOptions = {
-    model: chatModel.value,
-    messages: [{ role: "user", content: content.value }],
-    temperature: parseFloat(temperatureValue.value),
-    top_p: parseFloat(topP.value),
-    max_tokens: parseInt(maxTokens.value),
-    stream: true,
-    stop: stopSequences.value.length > 0 ? stopSequences.value : null,
-  };
+
+
+  // End Vars
 
 
   // Alert the user if no prompt value
   if (!content.value) {
-    alert("Please eneter a prompt.");
+    alert("Please enter a prompt.");
     return;
   }
 
@@ -182,7 +182,49 @@ const askAi = async () => {
   controller = new AbortController();
   const signal = controller.signal;
 
-  // ============= Fetch API call ===============================
+  // ========================================================================================= //
+  // ============= Use LangChain to send request to OpenAi API =============================== //
+  // ========================================================================================= //
+
+  const fetchOptions = {
+    modelName: chatModel.value,
+    openAIApiKey: decryptedString,
+
+    temperature: parseFloat(temperatureValue.value),
+    topP: parseFloat(topP.value),
+    maxTokens: parseInt(maxTokens.value),
+    stop: stopSequences.value.length > 0 ? stopSequences.value : null,
+
+    /*stream: true,
+     messages: [{ role: "user", content: content.value }],
+     */
+  };
+
+  const model = new OpenAI(fetchOptions);
+  const memory = new BufferMemory();
+  const chain = new ConversationChain({ llm: model, memory: memory });
+
+  const response = await model.call(content.value);
+
+  console.log(response);
+
+  // Construct the response box
+  let insertStarterText = starterText();
+  if (askedAiCalledPreviously) {
+    aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+  } else {
+    askedAiCalledPreviously = true;
+  }
+  aiQuery.value = `🧑 ${content.value}`;
+  aiResponse.value = `🤖 ${insertStarterText} ${response}`;
+
+  // Clear the prompt
+  content.value = "";
+  // --------- End construct the response box ----------------- //
+
+
+
+  /*
   await fetch(openAIURL, {
     method: "POST",
     headers: myHeaders,
@@ -219,57 +261,59 @@ const askAi = async () => {
       // in a streaming manner.
       const reader = data.getReader();
       const decoder = new TextDecoder("utf-8");
+*/
+  /* eslint-disable no-constant-condition */
+  /*
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
 
-      /* eslint-disable no-constant-condition */
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
+    // Massage and parse the chunk of data
+    const chunk = decoder.decode(value);
+    const lines = chunk.split("\n");
 
-        // Massage and parse the chunk of data
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
+    const parsedLines = lines
+      .map((line) => line.replace(/^data: /, "").trim())
+      .filter((line) => line !== "" && line !== "[DONE]")
+      .map((line) => JSON.parse(line)); // Parse the JSON string
 
-        const parsedLines = lines
-          .map((line) => line.replace(/^data: /, "").trim())
-          .filter((line) => line !== "" && line !== "[DONE]")
-          .map((line) => JSON.parse(line)); // Parse the JSON string
+    // Iterate through each parsed line in the parsedLines array
+    for (const parsedLine of parsedLines) {
+      const { choices } = parsedLine;
+      const { delta } = choices[0];
+      const { content: responseChunk } = delta;
 
-        // Iterate through each parsed line in the parsedLines array
-        for (const parsedLine of parsedLines) {
-          const { choices } = parsedLine;
-          const { delta } = choices[0];
-          const { content: responseChunk } = delta;
-
-          // Update the UI with the new content
-          if (responseChunk) {
-            aiResponse.value += responseChunk;
-          }
-        }
-
-      } // end of while loop
-
-      // -------- End of reading the response as a stream of data  -------------- //
-
-    })
-    .catch((error) => {
-      // Handle fetch request errors
-      if (signal.aborted) {
-        aiResponse.value = "Request aborted.";
-      } else {
-        aiConversation.value =
-          `I'm sorry. There was a problem with your request at this time. ${error}`;
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
+      // Update the UI with the new content
+      if (responseChunk) {
+        aiResponse.value += responseChunk;
       }
-    })
-    .finally(() => {
-      btnText.value = BTN_TEXT;
-      cancelButtonVisible.value = false;
-    });
+    }
+
+  } // end of while loop
+
+  // -------- End of reading the response as a stream of data  -------------- //
+
+})
+.catch((error) => {
+  // Handle fetch request errors
+  if (signal.aborted) {
+    aiResponse.value = "Request aborted.";
+  } else {
+    aiConversation.value =
+      `I'm sorry. There was a problem with your request at this time. ${error}`;
+    console.error(
+      "There has been a problem with your fetch operation:",
+      error
+    );
+  }
+})
+.finally(() => {
+  btnText.value = BTN_TEXT;
+  cancelButtonVisible.value = false;
+});
+*/
 };
 // -------------------------------------------------------------------- //
 // ----------------- End of askAI() ----------------------------------- //

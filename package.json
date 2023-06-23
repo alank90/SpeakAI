@@ -10,6 +10,7 @@
   "dependencies": {
     "floating-vue": "^2.0.0-beta.20",
     "idb": "^7.1.1",
+    "langchain": "^0.0.96",
     "netlify-cli": "^15.1.1",
     "vue": "^3.3.4",
     "vue-router": "^4.2.1"
