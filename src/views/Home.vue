@@ -194,8 +194,9 @@ const askAi = async () => {
     topP: parseFloat(topP.value),
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
-
-    /*stream: true,
+    streaming: true,
+    
+    /*
      messages: [{ role: "user", content: content.value }],
      */
   };
@@ -205,9 +206,6 @@ const askAi = async () => {
   const chain = new ConversationChain({ llm: model, memory: memory });
 
   const response = await chain.call({ input: content.value });
-
-  console.log(response);
-
   // Construct the response box
   let insertStarterText = starterText();
   if (askedAiCalledPreviously) {
@@ -216,7 +214,7 @@ const askAi = async () => {
     askedAiCalledPreviously = true;
   }
   aiQuery.value = `🧑 ${content.value}`;
-  aiResponse.value = `🤖 ${insertStarterText} ${response}`;
+  aiResponse.value = `🤖 ${insertStarterText} ${response.response}`;
 
   // Clear the prompt
   content.value = "";
