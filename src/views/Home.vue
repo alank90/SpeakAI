@@ -115,8 +115,6 @@ let theStopSequence = "";
 let askedAiCalledPreviously = false;
 let cancelButtonVisible = ref(false);
 
-let controller = null; // Store the AbortController instance
-
 const BTN_TEXT = "Submit 🚀";
 const content = ref("");
 const aiQuery = ref("");
@@ -126,7 +124,12 @@ const introText = ref("📖 The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
 let componentKey = ref(0);
 
-const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
+// Create a new AbortController instance
+let controller = new AbortController();
+let signal = controller.signal;
+
+
+// const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
 
 /* ================== Methods =============================== */
 /**
@@ -178,9 +181,6 @@ const askAi = async () => {
     );
   } // end !decryptedString if block
 
-  // Create a new AbortController instance
-  controller = new AbortController();
-  const signal = controller.signal;
 
   // ========================================================================================= //
   // ============= Use LangChain to send request to OpenAi API =============================== //
@@ -205,9 +205,10 @@ const askAi = async () => {
   const chain = new ConversationChain({ llm: model, memory: memory });
 
   try {
-    const response = await chain.call({ input: content.value });
+    const response = await chain.call({ input: content.value, signal: signal });
     // Construct the response box
     let insertStarterText = starterText();
+
     if (askedAiCalledPreviously) {
       aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
     } else {
@@ -220,14 +221,14 @@ const askAi = async () => {
     content.value = "";
     // --------- End construct the response box ----------------- //
   } catch (error) {
-    // Handle fetch request errors
-    if (signal.aborted) {
+    // Handle .call() request errors
+    if (controller.signal.aborted) {
       aiResponse.value = "Request aborted.";
     } else {
       aiConversation.value =
         `I'm sorry. There was a problem with your request at this time.`;
       console.error(
-        "There has been a problem with your fetch operation:",
+        "There has been a problem with your request operation:",
         error
       );
     }
@@ -404,7 +405,7 @@ const toggleApiOptionsVisibility = () => {
 };
 
 /**
- * @Description - clear the Conversation box
+ * @Description - Clear the Conversation box
  */
 
 const clearConversation = () => {
@@ -414,16 +415,21 @@ const clearConversation = () => {
 };
 
 /**
- * @Description - cancels the pending fetch request via 
+ * @Description - Cancels the pending fetch request via 
  *  the AbortController instance
  */
 
 const cancelRequest = () => {
-  // Cancel the fetch request by calling abort() on
-  // the AbortController instance
+  // Cancel the ConversationChain.call() request by calling abort() on
+  // the AbortController instance passed to it.
   if (controller) {
+    console.log("In abortController.", controller);
+
     controller.abort();
-    controller = null;
+    aiResponse.value = `🤖 ${controller.signal.reason}`;
+    // Reset AbortController
+    controller = new AbortController();
+    signal = controller.signal;
 
     componentKey.value += 1;
   }
