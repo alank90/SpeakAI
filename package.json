@@ -8,20 +8,20 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "floating-vue": "^2.0.0-beta.22",
+    "floating-vue": "^2.0.0-beta.24",
     "idb": "^7.1.1",
-    "langchain": "^0.0.96",
-    "netlify-cli": "^15.6.0",
+    "langchain": "^0.0.145",
+    "netlify-cli": "^16.3.1",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.2"
+    "vue-router": "^4.2.4"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
+    "@vitejs/plugin-vue": "^4.3.4",
     "@vue/compiler-sfc": "^3.3.4",
-    "eslint": "^8.43.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-vue": "^9.15.0",
-    "prettier": "2.8.8",
-    "vite": "^4.3.9"
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-vue": "^9.17.0",
+    "prettier": "3.0.3",
+    "vite": "^4.4.9"
   }
 }

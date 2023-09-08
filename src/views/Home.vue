@@ -93,7 +93,7 @@ import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
 
-/* LangChain Imports */
+// ===== LangChain Imports  ========== //
 import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
@@ -139,7 +139,6 @@ let signal = controller.signal;
 const askAi = async () => {
 
   // Vars
-
 
   // End Vars
 
