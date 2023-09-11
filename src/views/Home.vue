@@ -97,6 +97,7 @@ import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from 
 import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
+// ===== End LangChain Imports ========= //
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
@@ -193,6 +194,13 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
+    callbacks: [
+      {
+        handleLLMNewToken(token) {
+          process.stdout.write(token);
+        }
+      }
+    ]
 
     /*
      messages: [{ role: "user", content: content.value }],
