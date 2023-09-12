@@ -28,6 +28,7 @@
       <button @click="clearConversation" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
     </div>
 
+    /--
     <div class="chat-options">
       <div @click="toggleApiOptionsVisibility" class="arrow"></div>
 
@@ -41,15 +42,6 @@
         <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
           Clear API Key
         </button>
-
-        <label for="mode">Mode</label>
-        <div class="select" v-tooltip="tooltip.mode">
-          <select id="mode" v-model="chatMode">
-            <option value="chat/completions">Chat</option>
-            <option value="completions">Complete</option>
-          </select>
-          <span class="focus"></span>
-        </div>
 
         <label for="model">Model</label>
         <div class="select" v-tooltip="tooltip.model">
@@ -106,7 +98,6 @@ myHeaders.append("Content-Type", "application/json");
 let apiKey = ref("");
 let tokensUsed = ref(0);
 let chatModel = ref("gpt-3.5-turbo");
-let chatMode = ref("chat/completions");
 let decryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
@@ -128,9 +119,6 @@ let componentKey = ref(0);
 // Create a new AbortController instance
 let controller = new AbortController();
 let signal = controller.signal;
-
-
-// const openAIURL = `https://api.openai.com/v1/${chatMode.value}`;
 
 /* ================== Methods =============================== */
 /**
@@ -194,17 +182,8 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
-    callbacks: [
-      {
-        handleLLMNewToken(token) {
-          process.stdout.write(token);
-        }
-      }
-    ]
 
-    /*
-     messages: [{ role: "user", content: content.value }],
-     */
+
   };
 
   const model = new OpenAI(openAILLMOptions);
@@ -212,7 +191,15 @@ const askAi = async () => {
   const chain = new ConversationChain({ llm: model, memory: memory });
 
   try {
-    const response = await chain.call({ input: content.value, signal: signal });
+    const response = await chain.call({
+      input: content.value, signal: signal, callbacks: [
+        {
+          handleLLMNewToken(token) {
+            console.log(token);
+          }
+        }
+      ]
+    });
     // Construct the response box
     let insertStarterText = starterText();
 
