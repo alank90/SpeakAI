@@ -122,16 +122,10 @@ let signal = controller.signal;
 
 /* ================== Methods =============================== */
 /**
- * @Description - The function constructs & executes the Fetch API call
- *  to the OpenAI /completions endpoint.
+ * @Description - The function constructs & executes an LLMChain
+ *  request to OpenAI.
  */
 const askAi = async () => {
-
-  // Vars
-
-  // End Vars
-
-
   // Alert the user if no prompt value
   if (!content.value) {
     alert("Please enter a prompt.");
@@ -174,6 +168,8 @@ const askAi = async () => {
   // ============= Use LangChain to send request to OpenAi API =============================== //
   // ========================================================================================= //
 
+
+  // ======== Vars ===================== //
   const openAILLMOptions = {
     modelName: chatModel.value,
     openAIApiKey: decryptedString,
@@ -182,34 +178,34 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
-
-
   };
 
   const model = new OpenAI(openAILLMOptions);
   const memory = new BufferMemory();
   const chain = new ConversationChain({ llm: model, memory: memory });
 
-  try {
-    const response = await chain.call({
-      input: content.value, signal: signal, callbacks: [
-        {
-          handleLLMNewToken(token) {
-            console.log(token);
-          }
-        }
-      ]
-    });
-    // Construct the response box
-    let insertStarterText = starterText();
+  // Construct the response box
+  let insertStarterText = starterText();
 
+  try {
     if (askedAiCalledPreviously) {
       aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
     } else {
       askedAiCalledPreviously = true;
     }
+
     aiQuery.value = `🧑 ${content.value}`;
-    aiResponse.value = `🤖 ${insertStarterText} ${response.response}`;
+    aiResponse.value = `🤖 ${insertStarterText} `;
+
+    await chain.call({
+      input: content.value, signal: signal, callbacks: [
+        {
+          handleLLMNewToken(token) {
+            aiResponse.value += token;
+          }
+        }
+      ]
+    });
 
     // Clear the prompt
     content.value = "";
@@ -231,98 +227,6 @@ const askAi = async () => {
     cancelButtonVisible.value = false;
   }
 };
-
-
-/*
-await fetch(openAIURL, {
-  method: "POST",
-  headers: myHeaders,
-  body: JSON.stringify(openAILLMOptions),
-  signal, // Pass the signal to the fetch request
-})
-  .then((response) => {
-    return response.body;
-  })
-  .then(async (data) => {
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
-
-    // Construct the response box
-    let insertStarterText = starterText();
-    if (askedAiCalledPreviously) {
-      aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
-    } else {
-      askedAiCalledPreviously = true;
-    }
-    aiQuery.value = `🧑 ${content.value}`;
-    aiResponse.value = `🤖 ${insertStarterText}`;
-
-    // Clear the prompt
-    content.value = "";
-    // --------- End construct the response box ----------------- //
-
-
-    // -------- Read the response as a stream of data  -------------- //
-
-    // This line initializes a ReadableStreamDefaultReader 
-    // object named reader to read data from the response.body 
-    // in a streaming manner.
-    const reader = data.getReader();
-    const decoder = new TextDecoder("utf-8");
-*/
-/* eslint-disable no-constant-condition */
-/*
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) {
-    break;
-  }
-
-  // Massage and parse the chunk of data
-  const chunk = decoder.decode(value);
-  const lines = chunk.split("\n");
-
-  const parsedLines = lines
-    .map((line) => line.replace(/^data: /, "").trim())
-    .filter((line) => line !== "" && line !== "[DONE]")
-    .map((line) => JSON.parse(line)); // Parse the JSON string
-
-  // Iterate through each parsed line in the parsedLines array
-  for (const parsedLine of parsedLines) {
-    const { choices } = parsedLine;
-    const { delta } = choices[0];
-    const { content: responseChunk } = delta;
-
-    // Update the UI with the new content
-    if (responseChunk) {
-      aiResponse.value += responseChunk;
-    }
-  }
-
-} // end of while loop
-
-// -------- End of reading the response as a stream of data  -------------- //
-
-})
-.catch((error) => {
-// Handle fetch request errors
-if (signal.aborted) {
-  aiResponse.value = "Request aborted.";
-} else {
-  aiConversation.value =
-    `I'm sorry. There was a problem with your request at this time. ${error}`;
-  console.error(
-    "There has been a problem with your fetch operation:",
-    error
-  );
-}
-})
-.finally(() => {
-btnText.value = BTN_TEXT;
-cancelButtonVisible.value = false;
-});
-*/
 
 // -------------------------------------------------------------------- //
 // ----------------- End of askAI() ----------------------------------- //
@@ -352,8 +256,10 @@ const checkKey = (e) => {
 
 const starterText = () => {
   const startText = document.getElementById("start_text").value;
-
-  return startText;
+  if (startText) {
+    return startText;
+  }
+  else { return ""; }
 };
 
 /**
