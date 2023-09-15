@@ -2,8 +2,10 @@
   <h1>Welcome to SpeakAI</h1>
   <div class="grid-container">
     <div class="chat">
-      <textarea type="text" rows="2" cols="70" class="input" placeholder="Ask me about ...🧑🏻‍💻" v-model="content"
-        clear></textarea>
+
+      <span>System:</span><textarea type="text" rows="6" cols="70" class="input" v-model="systemPrompt" clear></textarea>
+      <span>User:</span><textarea type="text" rows="2" cols="70" class="input" placeholder="Ask me about ...🧑🏻‍💻"
+        v-model="content" clear></textarea>
 
       <div class="button-block">
         <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>
@@ -19,6 +21,7 @@
         </button>
       </div>
 
+      <span>AI Assistant:</span>
       <div class="card">
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
         <div class="ai-response"> {{ aiResponse }}</div>
@@ -28,7 +31,7 @@
       <button @click="clearConversation" v-if="aiConversation" class="btn--clear-block">Clear Chat</button>
     </div>
 
-    /--
+
     <div class="chat-options">
       <div @click="toggleApiOptionsVisibility" class="arrow"></div>
 
@@ -36,10 +39,18 @@
         <div v-if="tokensUsed > 0" class="tokens">Tokens Used: {{ tokensUsed }}</div>
 
         <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
-        <button @click="addAPIKey" class="btn--api-key" id="add-key">
+        <button @click="addAPIKey(apiKey)" class="btn--api-key" id="add-key">
           Store API Key
         </button>
         <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
+          Clear API Key
+        </button>
+
+        <input type="text" class="input api-input" placeholder="SerpAPI Key here..." v-model="serpAPIKey" clear />
+        <button @click="addAPIKey(serpAPIKey)" class="btn--api-key" id="add-serp-key">
+          Store SerpAPI Key
+        </button>
+        <button @click="clearAPIKey" class="btn--api-key" id="clear-serp-key">
           Clear API Key
         </button>
 
@@ -80,22 +91,27 @@
 </template>
 
 <script setup>
+// ========= Imports ================= //
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
-import { OpenAI } from "langchain/llms/openai";
-import { BufferMemory } from "langchain/memory";
-import { ConversationChain } from "langchain/chains";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+//import { BufferMemory } from "langchain/memory";
+import { HumanMessage, SystemMessage } from "langchain/schema";
+import { SerpAPI } from "langchain/tools";
 // ===== End LangChain Imports ========= //
 
+// ===== End of Imports ================ //
+
+// ======= Vars ========================================= // 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
-// ======= Vars ==================== // 
 let apiKey = ref("");
+let serpAPIKey = ref("");
 let tokensUsed = ref(0);
 let chatModel = ref("gpt-3.5-turbo");
 let decryptedString = null;
@@ -108,6 +124,7 @@ let askedAiCalledPreviously = false;
 let cancelButtonVisible = ref(false);
 
 const BTN_TEXT = "Submit 🚀";
+const systemPrompt = ref("The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.\n");
 const content = ref("");
 const aiQuery = ref("");
 const aiResponse = ref("");
@@ -120,7 +137,15 @@ let componentKey = ref(0);
 let controller = new AbortController();
 let signal = controller.signal;
 
-/* ================== Methods =============================== */
+// ========================================================= //
+// ========= End of Variable declarations ================== //
+// ========================================================= //
+
+// ------------------------------------------------------------------------------- //
+
+// ========================================================= //
+// ================== Methods ============================== //
+// ========================================================= //
 /**
  * @Description - The function constructs & executes an LLMChain
  *  request to OpenAI.
@@ -178,11 +203,14 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
+    verbose: true
   };
 
-  const model = new OpenAI(openAILLMOptions);
-  const memory = new BufferMemory();
-  const chain = new ConversationChain({ llm: model, memory: memory });
+  const tools = [];
+
+  const model = new ChatOpenAI(openAILLMOptions);
+  //const memory = new BufferMemory();
+  //const chain = new ConversationChain({ llm: model, memory: memory });
 
   // Construct the response box
   let insertStarterText = starterText();
@@ -197,14 +225,20 @@ const askAi = async () => {
     aiQuery.value = `🧑 ${content.value}`;
     aiResponse.value = `🤖 ${insertStarterText} `;
 
-    await chain.call({
-      input: content.value, signal: signal, callbacks: [
+
+    await model.call([
+      new SystemMessage(`${systemPrompt.value}`),
+      new HumanMessage(`${aiQuery.value}`)
+    ], {
+      signal: signal,
+      callbacks: [
         {
           handleLLMNewToken(token) {
             aiResponse.value += token;
           }
         }
       ]
+
     });
 
     // Clear the prompt
@@ -268,9 +302,9 @@ const starterText = () => {
  *  encrypted API string and the encryption key as properties.
  */
 
-const addAPIKey = async () => {
+const addAPIKey = async (key) => {
   // Generate a key pair and encrypt the openAI API key  in localstorage
-  const { encryptedText, keyPair } = await encryptString(apiKey.value);
+  const { encryptedText, keyPair } = await encryptString(key);
 
   // Create the indexDB database
   const db = await createDB();
@@ -363,6 +397,18 @@ h1 {
   grid-area: chat;
   border-right: 0.5px solid var(--main-ai-color);
   padding-right: 10px;
+}
+
+.chat span {
+  display: block;
+  color: var(--letter-ai-color);
+  font-family: var(--letter-font);
+  font-size: 1.3rem;
+  font-weight: 650;
+}
+
+textarea:first-of-type {
+  margin-bottom: 15px;
 }
 
 .chat-options {
@@ -749,7 +795,8 @@ button {
 }
 
 
-#add-key {
+#add-key,
+add-serp-key {
   margin-right: 5px;
 }
 
@@ -775,7 +822,7 @@ button svg {
   align-items: start;
   overflow: hidden;
   border-radius: 16px;
-  margin: 32px auto;
+  margin: 5px auto 32px;
   max-width: 65vw;
   min-height: 20%;
 }
