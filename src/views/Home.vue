@@ -39,18 +39,18 @@
         <div v-if="tokensUsed > 0" class="tokens">Tokens Used: {{ tokensUsed }}</div>
 
         <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
-        <button @click="addAPIKey(apiKey)" class="btn--api-key" id="add-key">
+        <button @click="addAPIKey(apiKey, apiKeyType = 'openAIAPIString')" class="btn--api-key" id="add-key">
           Store API Key
         </button>
-        <button @click="clearAPIKey" class="btn--api-key" id="clear-key">
+        <button @click="clearAPIKey('openAIAPIString')" class="btn--api-key" id="clear-key">
           Clear API Key
         </button>
 
         <input type="text" class="input api-input" placeholder="SerpAPI Key here..." v-model="serpAPIKey" clear />
-        <button @click="addAPIKey(serpAPIKey)" class="btn--api-key" id="add-serp-key">
+        <button @click="addAPIKey(serpAPIKey, apiKeyType = 'serpAPIString')" class="btn--api-key" id="add-serp-key">
           Store SerpAPI Key
         </button>
-        <button @click="clearAPIKey" class="btn--api-key" id="clear-serp-key">
+        <button @click="clearAPIKey('serpAPIString')" class="btn--api-key" id="clear-serp-key">
           Clear API Key
         </button>
 
@@ -95,13 +95,15 @@
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
-import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName } from "@/modules/indexedDBStorage.js";
+// eslint-disable-next-line no-unused-vars
+import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
 import { ChatOpenAI } from "langchain/chat_models/openai";
 //import { BufferMemory } from "langchain/memory";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { SerpAPI } from "langchain/tools";
+import { ChatAgent, AgentExecutor } from "langchain/agents";
 // ===== End LangChain Imports ========= //
 
 // ===== End of Imports ================ //
@@ -112,9 +114,11 @@ myHeaders.append("Content-Type", "application/json");
 
 let apiKey = ref("");
 let serpAPIKey = ref("");
+let apiKeyType = ref("");
 let tokensUsed = ref(0);
 let chatModel = ref("gpt-3.5-turbo");
-let decryptedString = null;
+let openAIDecryptedString = null;
+let SerpAPIDecryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
 let maxTokens = ref(300);
@@ -163,9 +167,10 @@ const askAi = async () => {
   cancelButtonVisible.value = true;
 
   // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
-  if (!decryptedString) {
+  if (!openAIDecryptedString) {
     const db = await getDBHandle();
     let dbItems = await getDBItems(db);
+    console.log(dbItems);
 
     // Check if db retrieval successful
     if (!dbItems) {
@@ -175,18 +180,25 @@ const askAi = async () => {
       return;
     }
     // else, continue
-    let encryptedString = dbItems[0];
+    // Note: We assume here that openAI API was stored first in indexDB storage
+    //  and serpAPI was stored afterwards. If not the case then will be sending 
+    //  serpAPI to openAI server and thus will fetch fails. This should be refactored
+    //  in the future....
+    let openAIEncryptedString = dbItems[0];
     let keyPair = dbItems[1];
+    let SerpAPIEncryptedString = dbItems[2];
+    let keyPair1 = dbItems[3];
 
-    // Decrypt the string. 
-    decryptedString = await decryptString(encryptedString, keyPair);
+    // Decrypt the string's. 
+    openAIDecryptedString = await decryptString(openAIEncryptedString, keyPair);
+    SerpAPIDecryptedString = await decryptString(SerpAPIEncryptedString, keyPair1);
 
     // Append new authorization header onto myHeaders if initial chat request for session.
     myHeaders.append(
       "Authorization",
-      `Bearer ${decryptedString}`
+      `Bearer ${openAIDecryptedString}`
     );
-  } // end !decryptedString if block
+  } // end !openAIDecryptedString if block
 
 
   // ========================================================================================= //
@@ -197,7 +209,7 @@ const askAi = async () => {
   // ======== Vars ===================== //
   const openAILLMOptions = {
     modelName: chatModel.value,
-    openAIApiKey: decryptedString,
+    openAIApiKey: openAIDecryptedString,
     temperature: parseFloat(temperatureValue.value),
     topP: parseFloat(topP.value),
     maxTokens: parseInt(maxTokens.value),
@@ -206,9 +218,23 @@ const askAi = async () => {
     verbose: true
   };
 
-  const tools = [];
+  const tools = [
+    new SerpAPI(SerpAPIDecryptedString, {
+      hl: "en",
+      gl: "us"
+    })
+  ];
 
   const model = new ChatOpenAI(openAILLMOptions);
+  const agent = ChatAgent.fromLLMAndTools(model, tools);
+  const executor = AgentExecutor.fromAgentAndTools({
+    agent: agent,
+    tools: tools,
+  });
+
+  const res = await executor.run("How may people live in the US in 2022?");
+  console.log(res);
+
   //const memory = new BufferMemory();
   //const chain = new ConversationChain({ llm: model, memory: memory });
 
@@ -302,7 +328,7 @@ const starterText = () => {
  *  encrypted API string and the encryption key as properties.
  */
 
-const addAPIKey = async (key) => {
+const addAPIKey = async (key, keyType) => {
   // Generate a key pair and encrypt the openAI API key  in localstorage
   const { encryptedText, keyPair } = await encryptString(key);
 
@@ -310,7 +336,7 @@ const addAPIKey = async (key) => {
   const db = await createDB();
 
   // Store the data in the DB.
-  await addDBEntry(db, encryptedText, keyPair);
+  await addDBEntry(db, encryptedText, keyPair, keyType);
 
   document.querySelector(".api-input").value = "";
 };
@@ -319,8 +345,8 @@ const addAPIKey = async (key) => {
  * @Description - Remove the API key from IndexDB storage.
  */
 
-const clearAPIKey = async () => {
-  await removeDB(dbName);
+const clearAPIKey = async (apiKeyToClear) => {
+  await removeKey(dbName, apiKeyToClear);
 
 };
 
@@ -475,6 +501,10 @@ textarea:first-of-type {
   font-size: 1.1rem;
   margin: 0 0 15px 0;
   padding: 6px;
+}
+
+.api-input[placeholder="SerpAPI Key here..."] {
+  margin-top: 30px;
 }
 
 label {

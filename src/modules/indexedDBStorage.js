@@ -34,12 +34,12 @@ async function createDB() {
 /**
  *
  * @param {*} db - reference to the indexedDB object
- * @param {*} apiText - encrypted API key
+ * @param {*} encryptedText - encrypted API key
  * @param {*} encryptionKey - encryption key pair
  * @returns - the IndexedDB key names
  */
 
-async function addDBEntry(db, apiText, encryptionKey) {
+async function addDBEntry(db, encryptedText, encryptionKey, keyName) {
   // Check if store already exists from previous add key action and
   // if not add the store
   if (!db.objectStoreNames.contains(storeName)) {
@@ -48,14 +48,13 @@ async function addDBEntry(db, apiText, encryptionKey) {
 
   const tx = db.transaction(storeName, "readwrite");
   const store = await tx.objectStore(storeName);
-
-  const dbKey = "apiString";
-  const textValue = await store.put(apiText, dbKey);
-  const key = "encryptionKey";
-  const keyValue = await store.put(encryptionKey, key);
+  const dbAPIEncryptedKeyValueName = keyName;
+  const textValue = await store.put(encryptedText, dbAPIEncryptedKeyValueName);
+  const dbEncryptionKeyName = `${keyName}-encryptionKey`;
+  const keyValue = await store.put(encryptionKey, dbEncryptionKeyName);
 
   await tx.done;
-  alert("API key successfully added! Refresh your browser now.");
+  alert(`${keyName} successfully added! Refresh your browser now.`);
 
   return { textValue, keyValue };
 }
@@ -114,4 +113,38 @@ async function removeDB(dbName) {
   };
 }
 
-export { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, dbName };
+/**
+ * @Description - Remove a key from indexDB storage
+ *
+ */
+
+async function removeKey(dbName, apiKeyToClear) {
+  console.log(dbName, apiKeyToClear);
+  const db = await openDB(dbName, version, {
+    upgrade(db, oldVersion, newVersion, transaction) {
+      const store = db.createObjectStore(storeName);
+    },
+  });
+
+  const tx = await db.transaction(storeName, "readwrite");
+  const store = await tx.objectStore(storeName);
+
+  const key = apiKeyToClear;
+  const key1 = `${apiKeyToClear}-encryptionKey`;
+  console.log(key1);
+  await store.delete(key);
+  await store.delete(key1);
+
+  await tx.done;
+
+  alert("Your API key was deleted successfully! Refresh your browser now.");
+}
+export {
+  createDB,
+  addDBEntry,
+  getDBItems,
+  getDBHandle,
+  removeDB,
+  dbName,
+  removeKey,
+};
