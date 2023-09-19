@@ -7,7 +7,10 @@
       <span>User:</span><textarea type="text" rows="2" cols="70" class="input" placeholder="Ask me about ...🧑🏻‍💻"
         v-model="content" clear></textarea>
 
+
       <div class="button-block">
+        <button type="button" @click="serpAPIAgentOn = !serpAPIAgentOn" class="btn--serpAPI"
+          :class="{ 'btn--serpAPI--active': serpAPIAgentOn }"> Use serpAPI</button>
         <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>
         <button type="button" @click="askAi" class="btn">
           <strong>{{ btnText }}</strong>
@@ -99,11 +102,11 @@ import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
+import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 //import { BufferMemory } from "langchain/memory";
 import { HumanMessage, SystemMessage } from "langchain/schema";
 import { SerpAPI } from "langchain/tools";
-import { ChatAgent, AgentExecutor } from "langchain/agents";
 // ===== End LangChain Imports ========= //
 
 // ===== End of Imports ================ //
@@ -116,6 +119,7 @@ let apiKey = ref("");
 let serpAPIKey = ref("");
 let apiKeyType = ref("");
 let tokensUsed = ref(0);
+let serpAPIAgentOn = ref(false);
 let chatModel = ref("gpt-3.5-turbo");
 let openAIDecryptedString = null;
 let SerpAPIDecryptedString = null;
@@ -170,7 +174,6 @@ const askAi = async () => {
   if (!openAIDecryptedString) {
     const db = await getDBHandle();
     let dbItems = await getDBItems(db);
-    console.log(dbItems);
 
     // Check if db retrieval successful
     if (!dbItems) {
@@ -215,77 +218,133 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
-    verbose: true
   };
 
-  const tools = [
-    new SerpAPI(SerpAPIDecryptedString, {
-      hl: "en",
-      gl: "us"
-    })
-  ];
 
-  const model = new ChatOpenAI(openAILLMOptions);
-  const agent = ChatAgent.fromLLMAndTools(model, tools);
-  const executor = AgentExecutor.fromAgentAndTools({
-    agent: agent,
-    tools: tools,
-  });
+  if (!serpAPIAgentOn.value) {
+    const model = new ChatOpenAI(openAILLMOptions);
+    //const memory = new BufferMemory();
+    //const chain = new ConversationChain({ llm: model, memory: memory });
 
-  const res = await executor.run("How may people live in the US in 2022?");
-  console.log(res);
+    // Construct the response box
+    let insertStarterText = starterText();
 
-  //const memory = new BufferMemory();
-  //const chain = new ConversationChain({ llm: model, memory: memory });
+    try {
+      // ==== First check if the request is a normal one with no need to use an agent
+      if (askedAiCalledPreviously) {
+        aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+      } else {
+        askedAiCalledPreviously = true;
+      }
 
-  // Construct the response box
-  let insertStarterText = starterText();
-
-  try {
-    if (askedAiCalledPreviously) {
-      aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
-    } else {
-      askedAiCalledPreviously = true;
-    }
-
-    aiQuery.value = `🧑 ${content.value}`;
-    aiResponse.value = `🤖 ${insertStarterText} `;
+      aiQuery.value = `🧑 ${content.value}`;
+      aiResponse.value = `🤖 ${insertStarterText} `;
 
 
-    await model.call([
-      new SystemMessage(`${systemPrompt.value}`),
-      new HumanMessage(`${aiQuery.value}`)
-    ], {
-      signal: signal,
-      callbacks: [
-        {
-          handleLLMNewToken(token) {
-            aiResponse.value += token;
+      await model.call([
+        new SystemMessage(`${systemPrompt.value}`),
+        new HumanMessage(`${aiQuery.value}`)
+      ], {
+        signal: signal,
+        callbacks: [
+          {
+            handleLLMNewToken(token) {
+              aiResponse.value += token;
+            }
           }
-        }
-      ]
+        ]
 
-    });
+      });
 
-    // Clear the prompt
-    content.value = "";
-    // --------- End construct the response box ----------------- //
-  } catch (error) {
-    // Handle .call() request errors
-    if (controller.signal.aborted) {
-      aiResponse.value = "Request aborted.";
-    } else {
-      aiConversation.value =
-        `I'm sorry. There was a problem with your request at this time.`;
-      console.error(
-        "There has been a problem with your request operation:",
-        error
-      );
+      // Clear the prompt
+      content.value = "";
+      // --------- End construct the response box ----------------- //
+    } catch (error) {
+      // Handle .call() request errors
+      if (controller.signal.aborted) {
+        aiResponse.value = "Request aborted.";
+      } else {
+        aiConversation.value =
+          `I'm sorry. There was a problem with your request at this time.`;
+        console.error(
+          "There has been a problem with your request operation:",
+          error
+        );
+      }
+    } finally {
+      btnText.value = BTN_TEXT;
+      cancelButtonVisible.value = false;
     }
-  } finally {
-    btnText.value = BTN_TEXT;
-    cancelButtonVisible.value = false;
+
+  } // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
+  else if (serpAPIAgentOn.value) {
+    const tools = [
+      new SerpAPI(SerpAPIDecryptedString, {
+        hl: "en",
+        gl: "us"
+      })
+    ];
+    const prefix = systemPrompt.value;
+    const model = new ChatOpenAI(openAILLMOptions);
+
+    // Construct the response box
+    let insertStarterText = starterText();
+
+    try {
+      if (askedAiCalledPreviously) {
+        aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+      } else {
+        askedAiCalledPreviously = true;
+      }
+
+      aiQuery.value = `🧑 ${content.value}`;
+      aiResponse.value = `🤖 ${insertStarterText} `;
+
+
+      const executor = await initializeAgentExecutorWithOptions(tools, model, {
+        agentType: "openai-functions",
+        verbose: true,
+        agentArgs: {
+          prefix,
+        },
+      });
+
+      await executor.call({
+        input: content.value,
+        signal: signal,
+        callbacks: [
+          {
+            handleLLMNewToken(token) {
+              aiResponse.value += token;
+            }
+          }
+        ],
+      });
+
+      // Clear the prompt
+      content.value = "";
+
+    } catch (error) {
+      // Handle .call() request errors
+      if (controller.signal.aborted) {
+        aiResponse.value = "Request aborted.";
+      } else {
+        aiConversation.value =
+          `I'm sorry. There was a problem with your request at this time.`;
+        console.error(
+          "There has been a problem with your request operation:",
+          error
+        );
+      }
+    } finally {
+      btnText.value = BTN_TEXT;
+      cancelButtonVisible.value = false;
+    }
+  } // End of else if
+  else {
+    alert("Error in fetching your answer. Try checking if you have the proper API keys stored in your browser's storage.");
   }
+
 };
 
 // -------------------------------------------------------------------- //
@@ -818,6 +877,20 @@ button {
   padding: 0;
   font-size: 1rem;
   background-color: var(--main-theme-color);
+}
+
+.btn--serpAPI {
+  display: inline;
+  width: 100%;
+  max-width: 125px;
+  margin-right: 25px;
+  padding: 0;
+  font-size: 1rem;
+  background-color: rgba(173, 81, 181, .5)
+}
+
+.btn--serpAPI--active {
+  background-color: rgba(173, 81, 181, 1);
 }
 
 .btn--api-key:hover {
