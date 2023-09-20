@@ -103,9 +103,11 @@ import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbN
 
 // ===== LangChain Imports  ========== //
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
+import { ConversationChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-//import { BufferMemory } from "langchain/memory";
-import { HumanMessage, SystemMessage } from "langchain/schema";
+import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
+import { BufferMemory } from "langchain/memory";
+//import { HumanMessage, SystemMessage } from "langchain/schema";
 import { SerpAPI } from "langchain/tools";
 // ===== End LangChain Imports ========= //
 
@@ -212,6 +214,7 @@ const askAi = async () => {
   // ======== Vars ===================== //
   const openAILLMOptions = {
     modelName: chatModel.value,
+    cache: true,
     openAIApiKey: openAIDecryptedString,
     temperature: parseFloat(temperatureValue.value),
     topP: parseFloat(topP.value),
@@ -220,17 +223,13 @@ const askAi = async () => {
     streaming: true,
   };
 
-
+  // ==== First check if the chat request is a normal one with no need to use an agent
   if (!serpAPIAgentOn.value) {
-    const model = new ChatOpenAI(openAILLMOptions);
-    //const memory = new BufferMemory();
-    //const chain = new ConversationChain({ llm: model, memory: memory });
 
     // Construct the response box
     let insertStarterText = starterText();
 
     try {
-      // ==== First check if the request is a normal one with no need to use an agent
       if (askedAiCalledPreviously) {
         aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
       } else {
@@ -240,11 +239,27 @@ const askAi = async () => {
       aiQuery.value = `🧑 ${content.value}`;
       aiResponse.value = `🤖 ${insertStarterText} `;
 
+      const chat = new ChatOpenAI(openAILLMOptions);
+      // Note - LangChain docs say to use .fromMessages but I got error
+      //  stating "No function -.fromMessages", so used used deprecated
+      //  .fromPromptMessages instead.
+      const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+        [
+          "system",
+          systemPrompt.value,
+        ],
+        new MessagesPlaceholder("history"),
+        ["human", content.value],
+      ]);
 
-      await model.call([
-        new SystemMessage(`${systemPrompt.value}`),
-        new HumanMessage(`${aiQuery.value}`)
-      ], {
+      const chain = new ConversationChain({
+        memory: new BufferMemory({ returnMessages: true, memoryKey: "history" }),
+        prompt: chatPrompt,
+        llm: chat,
+      });
+
+      await chain.call({
+        input: content.value,
         signal: signal,
         callbacks: [
           {
@@ -276,7 +291,8 @@ const askAi = async () => {
       cancelButtonVisible.value = false;
     }
 
-  } // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
+  }
+  // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
     const tools = [
       new SerpAPI(SerpAPIDecryptedString, {
