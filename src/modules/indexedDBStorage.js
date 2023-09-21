@@ -119,7 +119,6 @@ async function removeDB(dbName) {
  */
 
 async function removeKey(dbName, apiKeyToClear) {
-  console.log(dbName, apiKeyToClear);
   const db = await openDB(dbName, version, {
     upgrade(db, oldVersion, newVersion, transaction) {
       const store = db.createObjectStore(storeName);
@@ -131,7 +130,6 @@ async function removeKey(dbName, apiKeyToClear) {
 
   const key = apiKeyToClear;
   const key1 = `${apiKeyToClear}-encryptionKey`;
-  console.log(key1);
   await store.delete(key);
   await store.delete(key1);
 
@@ -139,6 +137,25 @@ async function removeKey(dbName, apiKeyToClear) {
 
   alert("Your API key was deleted successfully! Refresh your browser now.");
 }
+
+/**
+ * @Description - Checks for existence of an indexDB key in storage
+ *
+ */
+
+async function checkForSerpAPIKey() {
+  console.log("In checkfor.");
+  const db = await openDB(dbName, version);
+  const serpAPIKeyPresent = db.get(storeName, "serpAPIString");
+  console.log(serpAPIKeyPresent);
+
+  if (serpAPIKeyPresent) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 export {
   createDB,
   addDBEntry,
@@ -147,4 +164,5 @@ export {
   removeDB,
   dbName,
   removeKey,
+  checkForSerpAPIKey,
 };

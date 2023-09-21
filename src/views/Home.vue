@@ -9,7 +9,7 @@
 
 
       <div class="button-block">
-        <button type="button" @click="serpAPIAgentOn = !serpAPIAgentOn" class="btn--serpAPI"
+        <button type="button" @click="apiKeyCheck" class="btn--serpAPI"
           :class="{ 'btn--serpAPI--active': serpAPIAgentOn }"> Use serpAPI</button>
         <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>
         <button type="button" @click="askAi" class="btn">
@@ -60,6 +60,7 @@
         <label for="model">Model</label>
         <div class="select" v-tooltip="tooltip.model">
           <select id="model" v-model="chatModel">
+            <option value="gpt-4">GPT-4</option>
             <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
             <option value="text-davinci-003">Text-davinci-003</option>
             <option value="text-curie-001">Text-Curie-001</option>
@@ -99,7 +100,7 @@ import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 // eslint-disable-next-line no-unused-vars
-import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName } from "@/modules/indexedDBStorage.js";
+import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName, checkForSerpAPIKey } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
@@ -107,7 +108,6 @@ import { ConversationChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
 import { BufferMemory } from "langchain/memory";
-//import { HumanMessage, SystemMessage } from "langchain/schema";
 import { SerpAPI } from "langchain/tools";
 // ===== End LangChain Imports ========= //
 
@@ -221,6 +221,7 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
+    verbose: true,
   };
 
   // ==== First check if the chat request is a normal one with no need to use an agent
@@ -468,6 +469,24 @@ const cancelRequest = () => {
 
     componentKey.value += 1;
   }
+};
+
+/**
+ * @Description - checks for presence of SerpAPI key in indexDB Storage
+ * @returns - boolean
+ */
+
+const apiKeyCheck = async () => {
+  const serpAPIKeyPresent = await checkForSerpAPIKey();
+  console.log(serpAPIKeyPresent);
+
+  if (serpAPIKeyPresent) {
+    serpAPIAgentOn.value = !serpAPIAgentOn.value;
+  } else {
+    alert("Sorry. There is no SerpAPI on record for you.");
+  }
+
+
 };
 
 // -------------------------------------------------------------------------------------- //
