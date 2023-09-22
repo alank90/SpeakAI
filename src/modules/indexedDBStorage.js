@@ -66,7 +66,8 @@ async function addDBEntry(db, encryptedText, encryptionKey, keyName) {
  */
 async function getDBItems(db) {
   // First check if store exists
-  if (!db.objectStoreNames.contains(storeName)) {
+  const openAIKeyPresent = await db.get(storeName, "openAIAPIString");
+  if (!openAIKeyPresent) {
     alert(
       "It doesn't look like you have an API key registered. Please  1.refresh your browser, 2.click 'Clear API Key', and then 3.add a key."
     );
@@ -140,14 +141,12 @@ async function removeKey(dbName, apiKeyToClear) {
 
 /**
  * @Description - Checks for existence of an indexDB key in storage
- *
+ * @Returns - Boolean
  */
 
 async function checkForSerpAPIKey() {
-  console.log("In checkfor.");
   const db = await openDB(dbName, version);
-  const serpAPIKeyPresent = db.get(storeName, "serpAPIString");
-  console.log(serpAPIKeyPresent);
+  const serpAPIKeyPresent = await db.get(storeName, "serpAPIString");
 
   if (serpAPIKeyPresent) {
     return true;

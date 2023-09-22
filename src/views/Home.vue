@@ -298,7 +298,8 @@ const askAi = async () => {
     const tools = [
       new SerpAPI(SerpAPIDecryptedString, {
         hl: "en",
-        gl: "us"
+        gl: "us",
+        description: "a search engine. useful for when you need to answer questions about current events. input should be a search query."
       })
     ];
     const prefix = systemPrompt.value;
@@ -419,6 +420,7 @@ const addAPIKey = async (key, keyType) => {
 
 /**
  * @Description - Remove the API key from IndexDB storage.
+ * @Parameter - String holding the indexDB key name to delete
  */
 
 const clearAPIKey = async (apiKeyToClear) => {
@@ -473,12 +475,11 @@ const cancelRequest = () => {
 
 /**
  * @Description - checks for presence of SerpAPI key in indexDB Storage
- * @returns - boolean
+ *  If serpAPI key present, function toggles the button opacity.
  */
 
 const apiKeyCheck = async () => {
   const serpAPIKeyPresent = await checkForSerpAPIKey();
-  console.log(serpAPIKeyPresent);
 
   if (serpAPIKeyPresent) {
     serpAPIAgentOn.value = !serpAPIAgentOn.value;
