@@ -40,21 +40,29 @@ async function encryptionFunction(data, key) {
 
 /** 
   @Description - Fetch the ciphertext & keypair from localStorage, then decrypt it.
-  @return - {string}- decrypted localStorage API key
+  @return - {string}- decrypted localStorage API key or null.
   */
 
 async function decryptString(data, key) {
-  decryptedText = await window.crypto.subtle.decrypt(
-    {
-      name: "RSA-OAEP",
-    },
-    key.privateKey,
-    data
-  );
+  // Check if a valid key was passed. e.g. If there is no serpAPI
+  // entry in indexDB key will be undefined and throw an error if code
+  // is executed.
+  if (key) {
+    decryptedText = await window.crypto.subtle.decrypt(
+      {
+        name: "RSA-OAEP",
+      },
+      key.privateKey,
+      data
+    );
 
-  let dec = new TextDecoder();
-  decryptedText = dec.decode(decryptedText);
-  return decryptedText;
+    let dec = new TextDecoder();
+    decryptedText = dec.decode(decryptedText);
+
+    return decryptedText;
+  } else {
+    return null;
+  }
 }
 
 /**
