@@ -296,6 +296,7 @@ const askAi = async () => {
   }
   // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
+    console.log('im in serp');
     const tools = [
       new SerpAPI(SerpAPIDecryptedString, {
         hl: "en",

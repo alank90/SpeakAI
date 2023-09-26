@@ -116,6 +116,8 @@ async function removeDB(dbName) {
 
 /**
  * @Description - Remove a key from indexDB storage
+ * @parameters - dbName(String) indexDB store name, apiKeyToClear(String) key name of
+ *    API key to clear.
  *
  */
 
@@ -126,21 +128,27 @@ async function removeKey(dbName, apiKeyToClear) {
     },
   });
 
-  const tx = await db.transaction(storeName, "readwrite");
-  const store = await tx.objectStore(storeName);
+  const apiKeyPresent = await db.get(storeName, apiKeyToClear);
 
-  const key = apiKeyToClear;
-  const key1 = `${apiKeyToClear}-encryptionKey`;
-  await store.delete(key);
-  await store.delete(key1);
+  if (apiKeyPresent) {
+    const tx = await db.transaction(storeName, "readwrite");
+    const store = await tx.objectStore(storeName);
 
-  await tx.done;
+    const key = apiKeyToClear;
+    const key1 = `${apiKeyToClear}-encryptionKey`;
+    await store.delete(key);
+    await store.delete(key1);
 
-  alert("Your API key was deleted successfully! Refresh your browser now.");
+    await tx.done;
+
+    alert("Your API key was deleted successfully! Refresh your browser now.");
+  } else {
+    alert("Attention. No API key present.");
+  }
 }
 
 /**
- * @Description - Checks for existence of an indexDB key in storage
+ * @Description - Checks for existence of a "serpAPIString" indexDB key in storage
  * @Returns - Boolean
  */
 
