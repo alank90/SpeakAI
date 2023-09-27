@@ -175,11 +175,21 @@ const askAi = async () => {
   // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
   if (!openAIDecryptedString) {
     const db = await getDBHandle();
-    let dbItems = await getDBItems(db);
+    // Check if DB exists. Works for Chrome only.
+    if (!db) {
+      cancelButtonVisible.value = false;
+      btnText.value = BTN_TEXT;
+      alert("No Database found. Try adding an API key.");
 
-    // Check if db retrieval successful
+      return;
+    }
+
+    let dbItems = await getDBItems(db);
+    console.log(dbItems);
+    // Check if db retrieval successful. 
     if (!dbItems) {
-      alert("Failed IndexedDB getItems action.");
+      console.log("Failed IndexedDB getItems() call.");
+      cancelButtonVisible.value = false;
       btnText.value = BTN_TEXT;
 
       return;

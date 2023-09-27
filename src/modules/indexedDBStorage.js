@@ -69,7 +69,7 @@ async function getDBItems(db) {
   const openAIKeyPresent = await db.get(storeName, "openAIAPIString");
   if (!openAIKeyPresent) {
     alert(
-      "It doesn't look like you have an API key registered. Please  1.refresh your browser, 2.click 'Clear API Key', and then 3.add a key."
+      "It doesn't look like you have any API key's registered. Please  1.Refresh your browser and then add an API key."
     );
 
     return null;
@@ -89,8 +89,26 @@ async function getDBItems(db) {
  * @returns a pointer to the particular indexedDB requested
  */
 async function getDBHandle() {
-  const db = await openDB(dbName, version);
+  const userAgentString = navigator.userAgent;
+  console.log(userAgentString);
+  // Check for userAgent Chrome. If the browser then can use window.indexedDB.databases
+  if (userAgentString.indexOf("Chrome") > -1) {
+    const dbExists = (await window.indexedDB.databases())
+      .map((db) => db.name)
+      .includes(dbName);
+    console.log(dbExists);
 
+    if (dbExists) {
+      const db = await openDB(dbName, version);
+
+      return db;
+    } else {
+      return null;
+    }
+  }
+  // Else is Firefox and cant use window.indexedDB.databases
+  const db = await openDB(dbName, version);
+  console.log("db value for Firefox", db);
   return db;
 }
 
