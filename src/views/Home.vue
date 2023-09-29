@@ -262,7 +262,6 @@ const askAi = async () => {
         new MessagesPlaceholder("history"),
         ["human", content.value],
       ]);
-      console.log(chatPrompt);
 
       const chain = new ConversationChain({
         memory: new BufferMemory({ returnMessages: true, memoryKey: "history" }),

@@ -67,8 +67,8 @@ async function addDBEntry(db, encryptedText, encryptionKey, keyName) {
 async function getDBItems(db) {
   // First check if store exists
   const storeNames = db.objectStoreNames;
-  console.log("storeExists", storeNames);
-  if (storeNames.includes("store1")) {
+  console.log(storeNames.length);
+  if (storeNames.length > 0) {
     // Get all values stored in IndexedDB
     const dbItems = await db
       .transaction(storeName)
@@ -100,7 +100,6 @@ async function getDBHandle() {
     const dbExists = (await window.indexedDB.databases())
       .map((db) => db.name)
       .includes(dbName);
-    console.log(dbExists);
 
     if (dbExists) {
       const db = await openDB(dbName, version);
@@ -110,22 +109,20 @@ async function getDBHandle() {
       return false;
     }
   } else if (userAgentString.indexOf("Firefox") > -1) {
+    let db;
     // Else is Firefox and cant use window.indexedDB.databases
-    const db = await openDB(dbName, version);
-    console.log("db value for Firefox", db);
+    db = await openDB(dbName, version);
+    // check if indexDB database is empty
     const storeNames = db.objectStoreNames;
-    console.log(storeNames);
-    const dbItems = await getDBItems(db);
-    console.log("dbItems length", dbItems.length);
-    if (dbItems.length >= 2) {
-      return db;
-    } else {
+    if (storeNames.length === 0) {
       removeDB(db);
-      alert("No Database found. Try adding your API key.");
 
       return false;
+    } else {
+      return db;
     }
   } else {
+    // Fallback for IE,Safari, Opera etc
     const db = await openDB(dbName, version);
 
     return db;
@@ -140,7 +137,7 @@ async function removeDB(dbName) {
   const DBDeleteRequest = window.indexedDB.deleteDatabase(dbName);
 
   DBDeleteRequest.onsuccess = (event) => {
-    // event,result will be undefined if delete successful
+    // event.result will be undefined if delete successful
     if (event.result === undefined) {
       console.log("Database deleted successfully!");
     }
