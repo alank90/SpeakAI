@@ -66,22 +66,23 @@ async function addDBEntry(db, encryptedText, encryptionKey, keyName) {
  */
 async function getDBItems(db) {
   // First check if store exists
-  const openAIKeyPresent = await db.get(storeName, "openAIAPIString");
-  if (!openAIKeyPresent) {
+  const storeNames = db.objectStoreNames;
+  console.log("storeExists", storeNames);
+  if (storeNames.includes("store1")) {
+    // Get all values stored in IndexedDB
+    const dbItems = await db
+      .transaction(storeName)
+      .objectStore(storeName)
+      .getAll();
+
+    return dbItems;
+  } else {
     alert(
       "It doesn't look like you have any API key's registered. Please  1.Refresh your browser and then add an API key."
     );
 
     return null;
   }
-
-  // Get all values stored in IndexedDB
-  const dbItems = await db
-    .transaction(storeName)
-    .objectStore(storeName)
-    .getAll();
-
-  return dbItems;
 }
 
 /**
@@ -92,7 +93,10 @@ async function getDBHandle() {
   const userAgentString = navigator.userAgent;
   console.log(userAgentString);
   // Check for userAgent Chrome. If the browser then can use window.indexedDB.databases
-  if (userAgentString.indexOf("Chrome") > -1) {
+  if (
+    userAgentString.indexOf("Chrome") > -1 ||
+    userAgentString.indexOf("Edge") > -1
+  ) {
     const dbExists = (await window.indexedDB.databases())
       .map((db) => db.name)
       .includes(dbName);
@@ -103,13 +107,29 @@ async function getDBHandle() {
 
       return db;
     } else {
-      return null;
+      return false;
     }
+  } else if (userAgentString.indexOf("Firefox") > -1) {
+    // Else is Firefox and cant use window.indexedDB.databases
+    const db = await openDB(dbName, version);
+    console.log("db value for Firefox", db);
+    const storeNames = db.objectStoreNames;
+    console.log(storeNames);
+    const dbItems = await getDBItems(db);
+    console.log("dbItems length", dbItems.length);
+    if (dbItems.length >= 2) {
+      return db;
+    } else {
+      removeDB(db);
+      alert("No Database found. Try adding your API key.");
+
+      return false;
+    }
+  } else {
+    const db = await openDB(dbName, version);
+
+    return db;
   }
-  // Else is Firefox and cant use window.indexedDB.databases
-  const db = await openDB(dbName, version);
-  console.log("db value for Firefox", db);
-  return db;
 }
 
 /**
@@ -122,12 +142,12 @@ async function removeDB(dbName) {
   DBDeleteRequest.onsuccess = (event) => {
     // event,result will be undefined if delete successful
     if (event.result === undefined) {
-      alert("Your API key was deleted successfully! Refresh your browser now.");
+      console.log("Database deleted successfully!");
     }
 
     DBDeleteRequest.onerror = (event) => {
       console.log(event);
-      alert("Error deleting API key. Try closing browser and trying again.");
+      alert("Error deleting database. Try closing browser and trying again.");
     };
   };
 }
