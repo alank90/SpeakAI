@@ -10,13 +10,13 @@
   "dependencies": {
     "floating-vue": "^2.0.0-beta.24",
     "idb": "^7.1.1",
-    "langchain": "^0.0.156",
-    "netlify-cli": "^16.4.2",
+    "langchain": "^0.0.157",
+    "netlify-cli": "^16.5.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.3.4",
+    "@vitejs/plugin-vue": "^4.4.0",
     "@vue/compiler-sfc": "^3.3.4",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",

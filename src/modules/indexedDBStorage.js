@@ -91,7 +91,7 @@ async function getDBItems(db) {
  */
 async function getDBHandle() {
   const userAgentString = navigator.userAgent;
-  console.log(userAgentString);
+
   // Check for userAgent Chrome. If the browser then can use window.indexedDB.databases
   if (
     userAgentString.indexOf("Chrome") > -1 ||
