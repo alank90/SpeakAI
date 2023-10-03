@@ -14,7 +14,6 @@ const useFetchFile = async () => {
     .then((res) => res.json())
     .then((data) => {
       console.log(data);
-      console.log(data);
       goldenPromptsTable.value = data;
     })
     .catch((e) => console.log(e));

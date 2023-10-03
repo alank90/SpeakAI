@@ -67,7 +67,7 @@ async function addDBEntry(db, encryptedText, encryptionKey, keyName) {
 async function getDBItems(db) {
   // First check if store exists
   const storeNames = db.objectStoreNames;
-  console.log(storeNames.length);
+
   if (storeNames.length > 0) {
     // Get all values stored in IndexedDB
     const dbItems = await db

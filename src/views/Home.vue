@@ -49,7 +49,8 @@
           Clear API Key
         </button>
 
-        <input type="text" class="input api-input" placeholder="SerpAPI Key here..." v-model="serpAPIKey" clear />
+        <input type="text" id="serpKey" class="input api-input" placeholder="SerpAPI Key here..." v-model="serpAPIKey"
+          clear />
         <button @click="addAPIKey(serpAPIKey, apiKeyType = 'serpAPIString')" class="btn--api-key" id="add-serp-key">
           Store SerpAPI Key
         </button>
@@ -185,7 +186,7 @@ const askAi = async () => {
     }
 
     let dbItems = await getDBItems(db);
-    console.log(dbItems);
+
     // Check if db retrieval successful. 
     if (!dbItems) {
       console.log("Failed IndexedDB getItems() call.");
@@ -198,7 +199,8 @@ const askAi = async () => {
     // Note: We assume here that openAI API was stored first in indexDB storage
     //  and serpAPI was stored afterwards. If not the case then will be sending 
     //  serpAPI to openAI server and thus will fetch fails. This should be refactored
-    //  in the future....
+    //  in the future. Note- Turns out indexDB stores entries in sorted fashion regardless
+    //  of when store item was added. But still bad using magic numbers for array indexes...
     let openAIEncryptedString = dbItems[0];
     let keyPair = dbItems[1];
     let SerpAPIEncryptedString = dbItems[2];
@@ -208,11 +210,6 @@ const askAi = async () => {
     openAIDecryptedString = await decryptString(openAIEncryptedString, keyPair);
     SerpAPIDecryptedString = await decryptString(SerpAPIEncryptedString, keyPair1);
 
-    // Append new authorization header onto myHeaders if initial chat request for session.
-    myHeaders.append(
-      "Authorization",
-      `Bearer ${openAIDecryptedString}`
-    );
   } // end !openAIDecryptedString if block
 
 
@@ -251,10 +248,7 @@ const askAi = async () => {
       aiResponse.value = `🤖 ${insertStarterText} `;
 
       const chat = new ChatOpenAI(openAILLMOptions);
-      // Note - LangChain docs say to use .fromMessages but I got error
-      //  stating "No function -.fromMessages", so used used deprecated
-      //  .fromPromptMessages instead.
-      const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+      const chatPrompt = ChatPromptTemplate.fromMessages([
         [
           "system",
           systemPrompt.value,
@@ -305,7 +299,6 @@ const askAi = async () => {
   }
   // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
-    console.log('im in serp');
     const tools = [
       new SerpAPI(SerpAPIDecryptedString, {
         hl: "en",
@@ -414,10 +407,17 @@ const starterText = () => {
  * @Description - Event listener to store API key in indexedDB store.
  * @Calls - { Function } - encryptString() which returns an  {object} w/
  *  encrypted API string and the encryption key as properties.
+ * @returns - boolean.
  */
 
 const addAPIKey = async (key, keyType) => {
-  // Generate a key pair and encrypt the openAI API key  in localstorage
+  // First check if there is a non-empty key string
+  if (key.length === 0) {
+    alert("No API key submitted. Please recheck.");
+    return;
+  }
+
+  // Generate a key pair and encrypt the openAI/serpApi key in indexDB store
   const { encryptedText, keyPair } = await encryptString(key);
 
   // Create the indexDB database
@@ -426,7 +426,8 @@ const addAPIKey = async (key, keyType) => {
   // Store the data in the DB.
   await addDBEntry(db, encryptedText, keyPair, keyType);
 
-  document.querySelector(".api-input").value = "";
+  const serpKeyField = document.querySelector("#serpKey");
+  serpKeyField.value = "";
 };
 
 /**
@@ -472,8 +473,6 @@ const cancelRequest = () => {
   // Cancel the ConversationChain.call() request by calling abort() on
   // the AbortController instance passed to it.
   if (controller) {
-    console.log("In abortController.", controller);
-
     controller.abort();
     aiResponse.value = `🤖 ${controller.signal.reason}`;
     // Reset AbortController
