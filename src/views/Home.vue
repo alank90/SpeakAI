@@ -200,7 +200,7 @@ const askAi = async () => {
     //  and serpAPI was stored afterwards. If not the case then will be sending 
     //  serpAPI to openAI server and thus will fetch fails. This should be refactored
     //  in the future. Note- Turns out indexDB stores entries in sorted fashion regardless
-    //  of when store item was added. But still bad using magic numbers for array indexes...
+    //  of when store item was added. But still anti-pattern using magic numbers for array indexes...
     let openAIEncryptedString = dbItems[0];
     let keyPair = dbItems[1];
     let SerpAPIEncryptedString = dbItems[2];
