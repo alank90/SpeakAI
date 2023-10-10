@@ -313,6 +313,15 @@ const askAi = async () => {
     let insertStarterText = starterText();
 
     try {
+      fetch(`/.netlify/functions/serpapi`)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data.message);
+        });
+
+
       if (askedAiCalledPreviously) {
         aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
       } else {

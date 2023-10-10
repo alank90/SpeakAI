@@ -1,6 +1,7 @@
 {
   "name": "vite-prototype",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "vite --open",
     "dev": "vite --open",
