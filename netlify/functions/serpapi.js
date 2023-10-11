@@ -3,15 +3,14 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SerpAPI } from "langchain/tools";
 import { Calculator } from "langchain/tools/calculator";
 
-const serpKey = process.env.serp_api_key;
-const openAIKey = process.env.openai_api_key;
-console.log(serpKey);
+export const handler = async (event) => {
+  console.log(event.queryStringParameters.serpkey);
+  //const tools = [new Calculator(), new SerpAPI()];
 
-const tools = [new Calculator(), new SerpAPI()];
-
-exports.handler = async function (event) {
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: serpKey }),
+    body: JSON.stringify({
+      message: event.queryStringParameters,
+    }),
   };
 };

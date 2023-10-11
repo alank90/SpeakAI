@@ -313,7 +313,9 @@ const askAi = async () => {
     let insertStarterText = starterText();
 
     try {
-      fetch(`/.netlify/functions/serpapi`)
+      // Construct URL for fetch
+      const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}`
+      fetch(URL)
         .then((response) => {
           return response.json();
         })
