@@ -299,30 +299,22 @@ const askAi = async () => {
   }
   // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
-    const tools = [
+    /* const tools = [
       new SerpAPI(SerpAPIDecryptedString, {
         hl: "en",
         gl: "us",
         description: "a search engine. useful for when you need to answer questions about current events. input should be a search query."
       })
-    ];
+    ]; */
     const prefix = systemPrompt.value;
-    const model = new ChatOpenAI(openAILLMOptions);
+    //const model = new ChatOpenAI(openAILLMOptions);
 
     // Construct the response box
     let insertStarterText = starterText();
 
     try {
       // Construct URL for fetch
-      const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}`
-      fetch(URL)
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          console.log(data.message);
-        });
-
+      const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}&llmOptions=${JSON.stringify(openAILLMOptions)}&prefix=${prefix}&userinput=${content.value}`;
 
       if (askedAiCalledPreviously) {
         aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
@@ -333,26 +325,46 @@ const askAi = async () => {
       aiQuery.value = `🧑 ${content.value}`;
       aiResponse.value = `🤖 ${insertStarterText} `;
 
+      // Submit User input to OpenAI via Netlify Serverless function
+      fetch(URL)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data.message);
+          aiResponse.value += data.message;
+        });
 
-      const executor = await initializeAgentExecutorWithOptions(tools, model, {
-        agentType: "openai-functions",
-        verbose: true,
-        agentArgs: {
-          prefix,
-        },
-      });
 
-      await executor.call({
-        input: content.value,
-        signal: signal,
-        callbacks: [
-          {
-            handleLLMNewToken(token) {
-              aiResponse.value += token;
-            }
-          }
-        ],
-      });
+      /* if (askedAiCalledPreviously) {
+         aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+       } else {
+         askedAiCalledPreviously = true;
+       }
+ 
+       aiQuery.value = `🧑 ${content.value}`;
+       aiResponse.value = `🤖 ${insertStarterText} `;
+ 
+ 
+        const executor = await initializeAgentExecutorWithOptions(tools, model, {
+         agentType: "openai-functions",
+         verbose: true,
+         agentArgs: {
+           prefix,
+         },
+       });
+ 
+       await executor.call({
+         input: content.value,
+         signal: signal,
+         callbacks: [
+           {
+             handleLLMNewToken(token) {
+               aiResponse.value += token;
+             }
+           }
+         ],
+       }); */
 
       // Clear the prompt
       content.value = "";
