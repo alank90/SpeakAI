@@ -104,12 +104,10 @@ import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
 import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName, checkForSerpAPIKey } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
-import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ConversationChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
 import { BufferMemory } from "langchain/memory";
-import { SerpAPI } from "langchain/tools";
 // ===== End LangChain Imports ========= //
 
 // ===== End of Imports ================ //

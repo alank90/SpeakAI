@@ -1,8 +1,9 @@
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SerpAPI } from "langchain/tools";
+import { stream } from "@netlify/functions";
 
-export const handler = async (event) => {
+export const handler = stream(async (event) => {
   // ---------- Vars declarations -------------------------------- //
   const serpKey = event.queryStringParameters.serpkey;
   const llmOptions = JSON.parse(event.queryStringParameters.llmOptions);
@@ -39,12 +40,12 @@ export const handler = async (event) => {
       {
         handleLLMNewToken(token) {
           result += token;
+          console.log(result);
         },
       },
     ],
   });
 
-  console.log("LLM Answer: ", result);
   return {
     headers: {
       // This is the mimetype for server-sent events
@@ -55,4 +56,4 @@ export const handler = async (event) => {
       message: result,
     }),
   };
-};
+});
