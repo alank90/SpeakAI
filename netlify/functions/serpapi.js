@@ -1,16 +1,13 @@
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SerpAPI } from "langchain/tools";
-import { Calculator } from "langchain/tools/calculator";
 
 export const handler = async (event) => {
   // ---------- Vars declarations -------------------------------- //
-  const openAIKey = event.queryStringParameters.openaikey;
   const serpKey = event.queryStringParameters.serpkey;
   const llmOptions = JSON.parse(event.queryStringParameters.llmOptions);
   const prefix = event.queryStringParameters.prefix;
   const userInput = event.queryStringParameters.userinput;
-  console.log("User Input", userInput);
   const tools = [
     new SerpAPI(serpKey, {
       hl: "en",
@@ -47,10 +44,12 @@ export const handler = async (event) => {
     ],
   });
 
-  //const result = await executor.run(userInput);
   console.log("LLM Answer: ", result);
-
   return {
+    headers: {
+      // This is the mimetype for server-sent events
+      "content-type": "text/event-stream",
+    },
     statusCode: 200,
     body: JSON.stringify({
       message: result,

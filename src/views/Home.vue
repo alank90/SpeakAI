@@ -299,13 +299,6 @@ const askAi = async () => {
   }
   // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
-    /* const tools = [
-      new SerpAPI(SerpAPIDecryptedString, {
-        hl: "en",
-        gl: "us",
-        description: "a search engine. useful for when you need to answer questions about current events. input should be a search query."
-      })
-    ]; */
     const prefix = systemPrompt.value;
     //const model = new ChatOpenAI(openAILLMOptions);
 
@@ -335,40 +328,8 @@ const askAi = async () => {
           aiResponse.value += data.message;
         });
 
-
-      /* if (askedAiCalledPreviously) {
-         aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
-       } else {
-         askedAiCalledPreviously = true;
-       }
- 
-       aiQuery.value = `🧑 ${content.value}`;
-       aiResponse.value = `🤖 ${insertStarterText} `;
- 
- 
-        const executor = await initializeAgentExecutorWithOptions(tools, model, {
-         agentType: "openai-functions",
-         verbose: true,
-         agentArgs: {
-           prefix,
-         },
-       });
- 
-       await executor.call({
-         input: content.value,
-         signal: signal,
-         callbacks: [
-           {
-             handleLLMNewToken(token) {
-               aiResponse.value += token;
-             }
-           }
-         ],
-       }); */
-
       // Clear the prompt
       content.value = "";
-
     } catch (error) {
       // Handle .call() request errors
       if (controller.signal.aborted) {
