@@ -1,9 +1,8 @@
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SerpAPI } from "langchain/tools";
-import { stream } from "@netlify/functions";
 
-export const handler = stream(async (event) => {
+export const handler = async (event) => {
   // ---------- Vars declarations -------------------------------- //
   const serpKey = event.queryStringParameters.serpkey;
   const llmOptions = JSON.parse(event.queryStringParameters.llmOptions);
@@ -40,7 +39,6 @@ export const handler = stream(async (event) => {
       {
         handleLLMNewToken(token) {
           result += token;
-          console.log(result);
         },
       },
     ],
@@ -56,4 +54,4 @@ export const handler = stream(async (event) => {
       message: result,
     }),
   };
-});
+};

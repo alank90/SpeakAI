@@ -27,7 +27,11 @@
       <span>AI Assistant:</span>
       <div class="card">
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
-        <div class="ai-response"> {{ aiResponse }}</div>
+        <div class="ai-response"> {{ aiResponse }}
+          <div v-if="serpQueryPending" class="serp-query--pending">
+            <span>Hold on while I think...</span>
+          </div>
+        </div>
         <div class="ai-conversation"> {{ aiConversation }} </div>
       </div>
 
@@ -140,6 +144,7 @@ const aiResponse = ref("");
 const aiConversation = ref("");
 const introText = ref("📖 The answer will be displayed here.");
 const btnText = ref(BTN_TEXT);
+const serpQueryPending = ref(false);
 let componentKey = ref(0);
 
 // Create a new AbortController instance
@@ -170,6 +175,7 @@ const askAi = async () => {
   // Clear query box
   introText.value = "";
   cancelButtonVisible.value = true;
+
 
   // Let's fetch ai-key & key from indexedDB db and decrypt it if first chat request
   if (!openAIDecryptedString) {
@@ -212,9 +218,8 @@ const askAi = async () => {
 
 
   // ========================================================================================= //
-  // ============= Use LangChain to send request to OpenAi API =============================== //
+  // ============= Use LangChain to send request to OpenAI API =============================== //
   // ========================================================================================= //
-
 
   // ======== Vars ===================== //
   const openAILLMOptions = {
@@ -298,10 +303,10 @@ const askAi = async () => {
   // === Else check if we want to use a LangChain agent(SerpAPI) for the request ==== //
   else if (serpAPIAgentOn.value) {
     const prefix = systemPrompt.value;
-    //const model = new ChatOpenAI(openAILLMOptions);
 
     // Construct the response box
     let insertStarterText = starterText();
+    serpQueryPending.value = true;
 
     try {
       // Construct URL for fetch
@@ -317,13 +322,17 @@ const askAi = async () => {
       aiResponse.value = `🤖 ${insertStarterText} `;
 
       // Submit User input to OpenAI via Netlify Serverless function
-      fetch(URL)
+      fetch(URL, {
+        signal: signal,
+      })
         .then((response) => {
+          serpQueryPending.value = false;
           return response.json();
         })
         .then((data) => {
-          console.log(data.message);
           aiResponse.value += data.message;
+          btnText.value = BTN_TEXT;
+          cancelButtonVisible.value = false;
         });
 
       // Clear the prompt
@@ -340,9 +349,6 @@ const askAi = async () => {
           error
         );
       }
-    } finally {
-      btnText.value = BTN_TEXT;
-      cancelButtonVisible.value = false;
     }
   } // End of else if
   else {
@@ -462,6 +468,12 @@ const cancelRequest = () => {
     signal = controller.signal;
 
     componentKey.value += 1;
+  }
+  // Cleanup UI
+  if (serpAPIAgentOn.value) {
+    serpQueryPending.value = false;
+    cancelButtonVisible.value = false;
+    btnText.value = BTN_TEXT;
   }
 };
 
@@ -621,6 +633,50 @@ label {
   margin: -7px 0 0 0;
   font-size: 0.9rem;
 }
+
+.serp-query--pending span {
+  overflow: hidden;
+  /* Ensures the content is not revealed until the animation */
+  border-right: .15em solid rgb(219, 179, 232);
+  /* The typwriter cursor */
+  white-space: nowrap;
+  /* Keeps the content on a single line */
+  margin: 0 auto;
+  /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .15em;
+  /* Adjust as needed */
+  animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+  animation-iteration-count: infinite;
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 550;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from {
+    width: 0
+  }
+
+  to {
+    width: 100%
+  }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+
+  from,
+  to {
+    border-color: transparent
+  }
+
+  50% {
+    border-color: rgba(224, 178, 242, 0.789);
+  }
+}
+
+
 
 /* ==== Select Option Input Stylings ====== */
 
