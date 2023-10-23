@@ -29,7 +29,7 @@
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
         <div class="ai-response"> {{ aiResponse }}
           <div v-if="serpQueryPending" class="serp-query--pending">
-            <span>Hold on while I think...</span>
+            <span>Please hold on a moment...</span>
           </div>
         </div>
         <div class="ai-conversation"> {{ aiConversation }} </div>
@@ -632,6 +632,10 @@ label {
 .stop-sequence-note {
   margin: -7px 0 0 0;
   font-size: 0.9rem;
+}
+
+.serp-query--pending {
+  display: inline;
 }
 
 .serp-query--pending span {
