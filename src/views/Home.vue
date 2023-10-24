@@ -27,10 +27,8 @@
       <span>AI Assistant:</span>
       <div class="card">
         <div class="ai-query">{{ introText }} {{ aiQuery }}</div>
-        <div class="ai-response"> {{ aiResponse }}
-          <div v-if="serpQueryPending" class="serp-query--pending">
-            <span>Please hold on a moment...</span>
-          </div>
+        <div class="ai-response">{{ aiResponse }}<div v-if="serpQueryPending" class="serp-query--pending"><span>Please
+              hold on a moment...</span></div>
         </div>
         <div class="ai-conversation"> {{ aiConversation }} </div>
       </div>
@@ -1036,6 +1034,10 @@ button svg {
 
 .ai-response:nth-child(2) {
   background-color: #ebdbf4;
+}
+
+.ai-response:nth-child(2):empty {
+  opacity: 0;
 }
 
 .card::before {

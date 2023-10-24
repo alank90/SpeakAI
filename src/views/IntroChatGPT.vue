@@ -22,15 +22,15 @@
 
                         <p>With the following prompt:</p>
                         <code>
-                                                                                          Create a list of 10 fun and inexpensive toy gifts 
-                                                                                          to programmers based on the following criteria:
-                                                                              <br/>
-                                                                                          - It should be useful
-                                                                              <br/>
-                                                                                          - It should spark creativity 
-                                                                              <br/>
-                                                                                          - It should be silly
-                                                                              </code>
+                                                                                                                                    Create a list of 10 fun and inexpensive toy gifts 
+                                                                                                                                    to programmers based on the following criteria:
+                                                                                                                        <br/>
+                                                                                                                                    - It should be useful
+                                                                                                                        <br/>
+                                                                                                                                    - It should spark creativity 
+                                                                                                                        <br/>
+                                                                                                                                    - It should be silly
+                                                                                                                        </code>
 
 
 
@@ -49,10 +49,10 @@
                         <h3>Example</h3>
                         With the following prompt:
                         <code> You are a poet. Respond to the following:
-                                                                                                 "Explain the most important way
-                                                                                                  ChatGPT can help me. The answer 
-                                                                                                  should be no more than 100 words." 
-                                                                                          </code>
+                                                                                                                                           "Explain the most important way
+                                                                                                                                            ChatGPT can help me. The answer 
+                                                                                                                                            should be no more than 100 words." 
+                                                                                                                                    </code>
                         A response from ChatGPT-3.5 could be:
                         <img src="@/assets/images/img_roles_poet.webp" alt="A ChatGPT Response">
                   </section>
@@ -69,14 +69,14 @@
                         <p>With the following prompt:</p>
                         <p>A conversation between Kai, the author of a GPT-3.5 tutorial, and a student:</p>
                         <code>
-                                    Student: Why should I learn about Prompt Engineering?<br/>
-                                    Kai: Because Generative AI can really boost your productivity if used correctly, and knowing how to write prompts correctly is the key to helping you use generative AIs.<br/>
-                                    Student: What will I learn from this tutorial?<br/>
-                                    Kai: This tutorial gives step-by-step guides on how to write AI prompts to get the best possible results from ChatGPT-3.5. You will learn to understand ChatGPT-3.5's capabilities and write prompts that minimize misinformation and biased results.<br/>
-                                    Student: That sounds interesting. Can you give me an example of how Prompt Engineering can be used in real-world applications?,<br/>
-                                    Kai: Prompt Engineering can be used in a wide range of applications, such as content creation, customer service, and even scientific research. For example, let's say you're running a content creation platform and want to generate engaging article titles for your writers. Using Prompt Engineering techniques, you can write prompts that will help create article titles that are attention-grabbing and relevant to your readers. Another example is using generative AI to answer customer service inquiries. By writing well-crafted prompts, you can ensure that the AI responses are accurate and helpful, leading to higher customer satisfaction.<br/>
-                                    Student:<br/>
-                              </code>
+                                                                              Student: Why should I learn about Prompt Engineering?<br/>
+                                                                              Kai: Because Generative AI can really boost your productivity if used correctly, and knowing how to write prompts correctly is the key to helping you use generative AIs.<br/>
+                                                                              Student: What will I learn from this tutorial?<br/>
+                                                                              Kai: This tutorial gives step-by-step guides on how to write AI prompts to get the best possible results from ChatGPT-3.5. You will learn to understand ChatGPT-3.5's capabilities and write prompts that minimize misinformation and biased results.<br/>
+                                                                              Student: That sounds interesting. Can you give me an example of how Prompt Engineering can be used in real-world applications?,<br/>
+                                                                              Kai: Prompt Engineering can be used in a wide range of applications, such as content creation, customer service, and even scientific research. For example, let's say you're running a content creation platform and want to generate engaging article titles for your writers. Using Prompt Engineering techniques, you can write prompts that will help create article titles that are attention-grabbing and relevant to your readers. Another example is using generative AI to answer customer service inquiries. By writing well-crafted prompts, you can ensure that the AI responses are accurate and helpful, leading to higher customer satisfaction.<br/>
+                                                                              Student:<br/>
+                                                                        </code>
                         <p>A response from ChatGPT-3.5 could be:</p>
                         <img src="@/assets/images/img_shot.webp" alt="ChatGPT Response">
                   </section>
@@ -104,12 +104,36 @@
                   </table>
             </div>
 
+            <div v-if="pageNumber === 5">
+                  <h2>Using the Serp API</h2>
+                  <p>OpenAI Large Language Model(LLM) was trained on data up to 2021. This presents a problem because this
+                        means the LLM is
+                        not <em>aware</em> of events after the date of the cutoff. Ask the Chatbot what's the weather today it
+                        will tell you it
+                        can't answer you. Who won last night's Yankees game? Sorry, I don't have access to that information.
+                  </p>
+                  <p>To remedy this situation we can integrate agents into the OpenAI process. Agents allow the Chatbot
+                        to access resources that it can then use to formulate responses to your requests. In this particular
+                        app I have implemented what is known as the SERP agent to give our access to Google search to retrieve
+                        data
+                        on matters it has not been trained on, and with that information it has retrieved from Google,
+                        formulate responses. </p>
+                  <p> In order for you to use this functionality you must get an API key. Goto <a href="https://serpapi.com"
+                              target="_blank">Google Search API</a> and get
+                        your own Serp API key. Register under the free plan and you get one hundred requests per month. I
+                        have found them to be liberal about keeping track of requests. Once registered copy and paste your key
+                        into the app's "Store SerpAPI Key"
+                        field and press
+                        the store Serp key button. Now whenever you want to expose Google's power to the Chatbot click the
+                        "Use serpAPI" button
+                        and the AI will determine if it needs to use Google and formulate responses accordingly. </p>
+            </div>
 
       </main>
 
       <footer class="page-footer">
-            <span @click="pageNumber > 2 ? pageNumber-- : pageNumber = 4" class="left" title="Prev">&lt;</span>{{
-                  pageNumber }}<span @click="pageNumber < 4 ? pageNumber++ : pageNumber = 1" class="right" title="Next">&gt;</span>
+            <span @click="pageNumber > 2 ? pageNumber-- : pageNumber = 5" class="left" title="Prev">&lt;</span>{{
+                  pageNumber }}<span @click="pageNumber < 5 ? pageNumber++ : pageNumber = 1" class="right" title="Next">&gt;</span>
       </footer>
 </template>
 
@@ -226,13 +250,13 @@ img {
       font-family: var(--letter-font);
       min-width: 400px;
       max-width: 1100px;
-      -webkit-box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
-      -moz-box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
-      box-shadow: 23px 16px 35px 4px rgba(168, 237, 216, 1);
+      -webkit-box-shadow: 23px 16px 35px 4px rgba(233, 210, 236, 0.751);
+      -moz-box-shadow: 23px 16px 35px 4px rgba(233, 210, 236, 0.751);
+      box-shadow: 23px 16px 35px 4px rgba(233, 210, 236, 0.751);
 }
 
 .styled-table thead tr {
-      background-color: #009879;
+      background-color: var(--main-theme-color);
       color: #ffffff;
       text-align: left;
       font-size: 1.2rem;
@@ -253,27 +277,27 @@ img {
 }
 
 .styled-table tbody tr:last-of-type {
-      border-bottom: 2px solid #009879;
+      border-bottom: 2px solid var(--main-theme-color);
 }
 
 .styled-table tbody tr:nth-child(odd) {
       font-weight: bold;
       color: var(--letter-ai-color);
-      background-color: #e5f4e9;
+      background-color: #eadbebda;
 }
 
 .styled-table tbody tr:nth-child(odd):hover {
-      background-color: #91eca99a;
+      background-color: #e2baebbc;
 }
 
 .styled-table tbody tr:nth-child(even) {
       font-weight: bold;
       color: var(--letter-ai-color);
-      background-color: #cfebd7;
+      background-color: #e9b2ee;
 }
 
 .styled-table tbody tr:nth-child(even):hover {
-      background-color: #70ec93a4;
+      background-color: #e7baeec1;
 
 }
 
@@ -281,7 +305,7 @@ img {
 
 .page-footer {
       font-size: 1.6rem;
-      color: #ac51b5;
+      color: #000;
 }
 
 .page-footer span {
