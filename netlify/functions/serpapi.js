@@ -45,10 +45,6 @@ export const handler = async (event) => {
   });
 
   return {
-    headers: {
-      // This is the mimetype for server-sent events
-      "content-type": "text/event-stream",
-    },
     statusCode: 200,
     body: JSON.stringify({
       message: result,

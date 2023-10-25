@@ -306,49 +306,63 @@ const askAi = async () => {
     let insertStarterText = starterText();
     serpQueryPending.value = true;
 
-    try {
-      // Construct URL for fetch
-      const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}&llmOptions=${JSON.stringify(openAILLMOptions)}&prefix=${prefix}&userinput=${content.value}`;
 
-      if (askedAiCalledPreviously) {
-        aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
-      } else {
-        askedAiCalledPreviously = true;
-      }
+    // Construct URL for fetch
+    const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}&llmOptions=${JSON.stringify(openAILLMOptions)}&prefix=${prefix}&userinput=${content.value}`;
 
-      aiQuery.value = `🧑 ${content.value}`;
-      aiResponse.value = `🤖 ${insertStarterText} `;
+    if (askedAiCalledPreviously) {
+      aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
+    } else {
+      askedAiCalledPreviously = true;
+    }
 
-      // Submit User input to OpenAI via Netlify Serverless function
-      fetch(URL, {
-        signal: signal,
-      })
-        .then((response) => {
+    aiQuery.value = `🧑 ${content.value}`;
+    aiResponse.value = `🤖 ${insertStarterText} `;
+
+    // Submit User input to OpenAI via Netlify Serverless function
+    fetch(URL, {
+      signal: signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
           serpQueryPending.value = false;
-          return response.json();
-        })
-        .then((data) => {
-          aiResponse.value += data.message;
           btnText.value = BTN_TEXT;
           cancelButtonVisible.value = false;
-        });
+          return Promise.reject(response);
+        }
 
-      // Clear the prompt
-      content.value = "";
-    } catch (error) {
-      // Handle .call() request errors
-      if (controller.signal.aborted) {
-        aiResponse.value = "Request aborted.";
-      } else {
-        aiConversation.value =
-          `I'm sorry. There was a problem with your request at this time.`;
-        console.error(
-          "There has been a problem with your request operation:",
-          error
-        );
+        serpQueryPending.value = false;
+        return response.json();
+      })
+      .then((data) => {
+        console.log("data= ", data);
+        aiResponse.value += data.message;
+
+      })
+      .catch(error => {
+        console.error("In catch", error.message);
+        // Handle .call() request errors
+        if (error.message.includes("aborted")) {
+          aiResponse.value = "Request aborted.";
+        } else {
+          aiConversation.value =
+            `I'm sorry. There was a problem with your request at this time.`;
+          console.error(
+            "There has been a problem with your request operation:",
+            error
+          );
+        }
+      })
+      .finally(() => {
+        btnText.value = BTN_TEXT;
+        cancelButtonVisible.value = false;
+        // Clear the prompt
+        content.value = "";
       }
-    }
-  } // End of else if
+      );
+
+
+  } // ---------- End of else if ------------------------- //
   else {
     alert("Error in fetching your answer. Try checking if you have the proper API keys stored in your browser's storage.");
   }
