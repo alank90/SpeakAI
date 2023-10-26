@@ -281,8 +281,9 @@ const askAi = async () => {
       content.value = "";
       // --------- End construct the response box ----------------- //
     } catch (error) {
+      console.log("im in abort", error.message);
       // Handle .call() request errors
-      if (controller.signal.aborted) {
+      if (error.message.includes("AbortError")) {
         aiResponse.value = "Request aborted.";
       } else {
         aiConversation.value =
@@ -335,9 +336,7 @@ const askAi = async () => {
         return response.json();
       })
       .then((data) => {
-        console.log("data= ", data);
         aiResponse.value += data.message;
-
       })
       .catch(error => {
         console.error("In catch", error.message);
