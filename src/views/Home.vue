@@ -81,7 +81,7 @@
         <input type="range" id="top_P" name="top_P" min="0" max="1" step=".01" v-model="topP" v-tooltip="tooltip.top_p" />
 
         <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
-        <input type="range" id="max_tokens" name="max_tokens" min="0" max="2048" step="5" v-model="maxTokens"
+        <input type="range" id="max_tokens" name="max_tokens" min="0" max="4000" step="5" v-model="maxTokens"
           v-tooltip="tooltip.max_tokens" />
 
         <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>

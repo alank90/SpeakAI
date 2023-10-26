@@ -1,6 +1,7 @@
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SerpAPI } from "langchain/tools";
+import { Calculator } from "langchain/tools/calculator";
 
 export const handler = async (event) => {
   // ---------- Vars declarations -------------------------------- //
@@ -15,6 +16,7 @@ export const handler = async (event) => {
       description:
         "a search engine. useful for when you need to answer questions about current events. input should be a search query.",
     }),
+    new Calculator(),
   ];
   let result = "";
 
