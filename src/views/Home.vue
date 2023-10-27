@@ -280,7 +280,6 @@ const askAi = async () => {
       content.value = "";
       // --------- End construct the response box ----------------- //
     } catch (error) {
-      console.log("im in abort", error.message);
       // Handle .call() request errors
       if (error.message.includes("AbortError")) {
         aiResponse.value = "Request aborted.";
