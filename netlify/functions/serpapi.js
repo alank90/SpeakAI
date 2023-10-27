@@ -28,7 +28,6 @@ export const handler = async (event) => {
 
   const executor = await initializeAgentExecutorWithOptions(tools, chat, {
     agentType: "openai-functions",
-    verbose: true,
     agentArgs: {
       prefix,
     },

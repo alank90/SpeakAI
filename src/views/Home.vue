@@ -9,7 +9,7 @@
 
 
       <div class="button-block">
-        <button type="button" @click="apiKeyCheck" class="btn--serpAPI"
+        <button v-if="!cancelButtonVisible" type="button" @click="apiKeyCheck" class="btn--serpAPI"
           :class="{ 'btn--serpAPI--active': serpAPIAgentOn }"> Use serpAPI</button>
         <button type="button" @click="cancelRequest" v-show="cancelButtonVisible" class="btn--cancel">Cancel</button>
         <button type="button" @click="askAi" class="btn">
@@ -229,7 +229,6 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
-    verbose: true,
   };
 
   // ==== First check if the chat request is a normal one with no need to use an agent
