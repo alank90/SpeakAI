@@ -81,7 +81,7 @@
         <input type="range" id="top_P" name="top_P" min="0" max="1" step=".01" v-model="topP" v-tooltip="tooltip.top_p" />
 
         <label for="max_tokens">Maximum Length: {{ maxTokens }}</label>
-        <input type="range" id="max_tokens" name="max_tokens" min="0" max="4000" step="5" v-model="maxTokens"
+        <input type="range" id="max_tokens" name="max_tokens" min="0" max="4000" step="10" v-model="maxTokens"
           v-tooltip="tooltip.max_tokens" />
 
         <label for="stop_sequences">Stop sequences: {{ stopSequences }} </label>
@@ -102,8 +102,7 @@
 import { ref } from "vue";
 import tooltip from "@/modules/useTooltip.js";
 import { encryptString, decryptString } from "@/modules/subtleCrypto.js";
-// eslint-disable-next-line no-unused-vars
-import { createDB, addDBEntry, getDBItems, getDBHandle, removeDB, removeKey, dbName, checkForSerpAPIKey } from "@/modules/indexedDBStorage.js";
+import { createDB, addDBEntry, getDBItems, getDBHandle, removeKey, dbName, checkForSerpAPIKey } from "@/modules/indexedDBStorage.js";
 
 // ===== LangChain Imports  ========== //
 import { ConversationChain } from "langchain/chains";
@@ -112,12 +111,9 @@ import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
 import { BufferMemory } from "langchain/memory";
 // ===== End LangChain Imports ========= //
 
-// ===== End of Imports ================ //
+// -------------- End of Imports ------------------------------------ //
 
 // ======= Vars ========================================= // 
-const myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
-
 let apiKey = ref("");
 let serpAPIKey = ref("");
 let apiKeyType = ref("");
@@ -128,7 +124,7 @@ let openAIDecryptedString = null;
 let SerpAPIDecryptedString = null;
 let temperatureValue = ref(0.5);
 let topP = ref(0);
-let maxTokens = ref(300);
+let maxTokens = ref(500);
 let stopSequences = ref([]);
 let theStopSequence = "";
 let askedAiCalledPreviously = false;
@@ -338,13 +334,12 @@ const askAi = async () => {
         aiResponse.value += data.message;
       })
       .catch(error => {
-        console.error("In catch", error.message);
-        // Handle .call() request errors
-        if (error.message.includes("aborted")) {
+        // Handle .call() request errors. Notice use of optional chaining(?).
+        if (error.message?.includes("aborted")) {
           aiResponse.value = "Request aborted.";
         } else {
           aiConversation.value =
-            `I'm sorry. There was a problem with your request at this time.`;
+            `I'm sorry. There was a problem with your request at this time. ${error.statusText}`;
           console.error(
             "There has been a problem with your request operation:",
             error
