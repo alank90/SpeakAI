@@ -225,7 +225,6 @@ const askAi = async () => {
     maxTokens: parseInt(maxTokens.value),
     stop: stopSequences.value.length > 0 ? stopSequences.value : null,
     streaming: true,
-    verbose: true
   };
 
   // ==== First check if the chat request is a normal one with no need to use an agent
@@ -254,8 +253,9 @@ const askAi = async () => {
         ["human", content.value],
       ]);
 
+      const memory = new BufferMemory({ returnMessages: true, memoryKey: "history" });
       const chain = new ConversationChain({
-        memory: new BufferMemory({ returnMessages: true, memoryKey: "history" }),
+        memory: memory,
         prompt: chatPrompt,
         llm: chat,
       });
