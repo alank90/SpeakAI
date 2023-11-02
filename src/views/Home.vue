@@ -43,7 +43,7 @@
       <div class="options">
         <div v-if="tokensUsed > 0" class="tokens">Tokens Used: {{ tokensUsed }}</div>
 
-        <input type="text" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
+        <input type="text" id="openAIKey" class="input api-input" placeholder="API Key here..." v-model="apiKey" clear />
         <button @click="addAPIKey(apiKey, apiKeyType = 'openAIAPIString')" class="btn--api-key" id="add-key">
           Store API Key
         </button>
@@ -419,8 +419,12 @@ const addAPIKey = async (key, keyType) => {
   // Store the data in the DB.
   await addDBEntry(db, encryptedText, keyPair, keyType);
 
-  const serpKeyField = document.querySelector("#serpKey");
-  serpKeyField.value = "";
+  if (keyType === "openAIAPIString") {
+    document.querySelector("#openAIKey").value = "";
+  } else {
+    document.querySelector("#serpKey").value = "";
+  }
+
 };
 
 /**
