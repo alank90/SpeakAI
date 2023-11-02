@@ -11,6 +11,14 @@ _Note_ - For a good writeup on how we streamed the completions from OpenAI /comp
 
 - [floating-vue](https://floating-vue.starpad.dev/) - A tooltips and dropdowns library.
 
+- [An OpenAI API Key](https://platform.openai.com/login?launch) - API key for OpenAI
+
+- [SERP API Key](https://serpapi.com/)- A SERP API key to use the SERP agent(optional).
+
+## Notes
+
+This app utilizes a Netlify Serverless function to proxy the request to the Google SERP API because,of course,Google doesn't support CORS.
+
 ### Deploying to Netlify
 
 - **_npm run build_**
@@ -19,3 +27,5 @@ _Note_ - For a good writeup on how we streamed the completions from OpenAI /comp
 
 - **_netlify env:import .env_** (If necessary. You must then rebuild the project to add the environment
   variables to your project.)
+
+- **Important** - The Node.js version must be set to at least _18.x_. This can be set under _Site Configuation -> Dependency management_.
