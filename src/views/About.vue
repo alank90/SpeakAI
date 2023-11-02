@@ -6,6 +6,11 @@
       <a
         href="https://auth0.openai.com/u/signup/identifier?state=hKFo2SBHVG95Q0RVZmxrY2FSbDJCREp4MTR5TTk1UFU2YWs0WaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHpqdkZveE9QZEVqeGhzckxXS0xQTl9hNFVSeTh5UVhPo2NpZNkgRFJpdnNubTJNdTQyVDNLT3BxZHR3QjNOWXZpSFl6d0Q">Goto
         OpenAI to signup.</a>
+      In addition to address one of the LLM's shortcomings, no awareness of events after the date it was taught, I have
+      implemented a search agent that allow's the
+      LLM to forward requests to a Google search API that and then integrate response with the LLM. <em>Important: Must
+        keep the responses short when using the SERP agent. Any responses that take more then 10 secs will timeout </em>
+      <a href="https://serpapi.com">Signup for SERP API key.</a>
     </p>
     <p>I designed this site to give people the opportunity to aquaint themselves with some of what AI is capable of.
       There is the main page which allows you to create what are called "prompts" to interact with Chat GPT service and
@@ -19,7 +24,7 @@
   </main>
 
   <footer class="page-footer">&copy; 2023 by <a href="https://alank-portfolio.netlify.app/" target="_blank">Alan
-      Killian</a></footer>
+      Killian</a>SpeakAI v.61</footer>
 </template>
 
 
