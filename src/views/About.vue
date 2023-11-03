@@ -46,7 +46,7 @@ p {
 }
 
 footer>p {
-  width: 15%;
+  width: 35%;
   margin: 0 auto;
 }
 
