@@ -29,7 +29,7 @@
 }
 
 .navbar-item-one {
-  margin: 0 0 5px 2px;
+  margin: 2px 0 5px 2px;
   border-radius: 50%;
   width: 4rem;
 }

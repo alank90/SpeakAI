@@ -6,25 +6,27 @@
       <a
         href="https://auth0.openai.com/u/signup/identifier?state=hKFo2SBHVG95Q0RVZmxrY2FSbDJCREp4MTR5TTk1UFU2YWs0WaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHpqdkZveE9QZEVqeGhzckxXS0xQTl9hNFVSeTh5UVhPo2NpZNkgRFJpdnNubTJNdTQyVDNLT3BxZHR3QjNOWXZpSFl6d0Q">Goto
         OpenAI to signup.</a>
-      In addition to address one of the LLM's shortcomings, no awareness of events after the date it was taught, I have
+      In addition, to address one of the LLM's shortcomings of no awareness of events after the date it was taught, I have
       implemented a search agent that allow's the
-      LLM to forward requests to a Google search API that and then integrate response with the LLM. <em>Important: Must
+      LLM to forward requests to a Google search API that will then integrate a response with the LLM. <em>Important: Must
         keep the responses short when using the SERP agent. Any responses that take more then 10 secs will timeout </em>
       <a href="https://serpapi.com">Signup for SERP API key.</a>
     </p>
-    <p>I designed this site to give people the opportunity to aquaint themselves with some of what AI is capable of.
+    <p>I designed this site to give people the opportunity to acquaint themselves with some of what AI is capable of.
       There is the main page which allows you to create what are called "prompts" to interact with Chat GPT service and
       tweak certain of the options available to you for the responses.</p>
     <p>DALL-E is an AI system that can create realistic images and art from a description in natural language.<a
         href="https://openai.com/research/dall-e">DALL-E info.</a></p>
-    <p><em>Note</em> - Storing API keys, even though encrypted, in the browser is inherently insecure. This site is
-      intended only
-      to get you started designing prompts in chatGPT. Since most people will only be using the free account this
-      mitigates your exposure somewhat. </p>
+    <p><em>Note</em> - Storing API keys, even though encrypted, in the browser and sending the AI requests directly from
+      the browser exposes your keys to the world and is inherently insecure. This site is
+      intended only to get you started designing prompts in chatGPT. Since most people will only be using the free account
+      this mitigates your exposure somewhat. </p>
   </main>
 
   <footer class="page-footer">&copy; 2023 by <a href="https://alank-portfolio.netlify.app/" target="_blank">Alan
-      Killian</a>SpeakAI v.61</footer>
+      Killian</a>
+    <p>SpeakAI v.61</p>
+  </footer>
 </template>
 
 
@@ -41,6 +43,11 @@ p {
   font-weight: 600;
   text-align: left;
   text-indent: 40px;
+}
+
+footer>p {
+  width: 15%;
+  margin: 0 auto;
 }
 
 a {
