@@ -281,7 +281,7 @@ const askAi = async () => {
       if (error.message.includes("AbortError")) {
         aiResponse.value = "Request aborted.";
       } else {
-        aiConversation.value =
+        aiResponse.value =
           `I'm sorry. There was a problem with your request at this time.`;
         console.error(
           "There has been a problem with your request operation:",
@@ -338,7 +338,7 @@ const askAi = async () => {
         if (error.message?.includes("aborted")) {
           aiResponse.value = "Request aborted.";
         } else {
-          aiConversation.value =
+          aiResponse.value =
             `I'm sorry. There was a problem with your request at this time. ${error.statusText}`;
           console.error(
             "There has been a problem with your request operation:",
