@@ -48,6 +48,7 @@ p {
 footer>p {
   width: 35%;
   margin: 0 auto;
+  text-align: center;
 }
 
 a {

@@ -18,6 +18,8 @@
   --select-border: #ac51b5;
   --select-focus: rgb(136, 10, 174);
   --select-arrow: var(--select-border);
+  --main-box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2),
+    0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
   --heading-font: "Old Standard TT", serif;
   --letter-font: "Cormorant", serif;
@@ -63,6 +65,48 @@ a {
 
 li {
   list-style-type: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  width: 150px;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+input,
+textarea {
+  font:
+    1.4em/1.5em "handwriting",
+    cursive,
+    sans-serif;
+  border: none;
+  padding: 0 10px;
+  margin: 0;
+  width: 80%;
+}
+
+input:focus,
+textarea:focus {
+  background: rgba(248, 217, 244, 0.3);
+  border-radius: 5px;
+}
+
+textarea {
+  display: block;
+  padding: 10px;
+  margin: 10px auto;
+  width: 100%;
+  height: auto;
+  border-right: 1px solid;
+
+  /* resize  : none; */
+  overflow: auto;
 }
 
 /* ==== Tooltip Overides ==== */

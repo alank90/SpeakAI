@@ -3,7 +3,7 @@
   <div class="grid-container">
     <div class="chat">
 
-      <span>System:</span><textarea type="text" rows="6" cols="70" class="input" v-model="systemPrompt" clear></textarea>
+      <span>System:</span><textarea type="text" rows="3" cols="70" class="input" v-model="systemPrompt" clear></textarea>
       <span>User:</span><textarea type="text" rows="2" cols="70" class="input" placeholder="Ask me about ...🧑🏻‍💻"
         v-model="content" clear></textarea>
 
@@ -552,6 +552,10 @@ textarea:first-of-type {
 
 .options {
   transition: all .5s ease-out;
+}
+
+button {
+  box-shadow: var(--main-box-shadow);
 }
 
 .el-col-width {
