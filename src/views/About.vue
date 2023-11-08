@@ -15,12 +15,23 @@
     <p>I designed this site to give people the opportunity to acquaint themselves with some of what AI is capable of.
       There is the main page which allows you to create what are called "prompts" to interact with Chat GPT service and
       tweak certain of the options available to you for the responses.</p>
-    <p>DALL-E is an AI system that can create realistic images and art from a description in natural language.<a
-        href="https://openai.com/research/dall-e">DALL-E info.</a></p>
-    <p><em>Note</em> - Storing API keys, even though encrypted, in the browser and sending the AI requests directly from
+    <p>DALL-E is an AI system that can create realistic images and art from a description in natural language.
+      <a href="https://openai.com/research/dall-e">DALL-E info.</a>
+    </p>
+
+    <ul>Important!</ul>
+    <p>
+      - Storing API keys, even though encrypted, in the browser and sending the AI requests
+      directly
+      from
       the browser exposes your keys to the world and is inherently insecure. This site is
       intended only to get you started designing prompts in chatGPT. Since most people will only be using the free account
-      this mitigates your exposure somewhat. </p>
+      this mitigates your exposure somewhat. If you decide to start paying a subscription fee for more usage I strongly
+      urge you to
+      to go to the <a href="https://platform.openai.com/account/limits">Usage limits page</a> and set some hard limits on
+      your account usage like I do.
+      <img src="../assets/images/usage_limits.png" alt="Image limits page">
+    </p>
   </main>
 
   <footer class="page-footer">&copy; 2023 by <a href="https://alank-portfolio.netlify.app/" target="_blank">Alan
@@ -61,6 +72,18 @@ a {
   background-position-x: 50%;
   background-repeat: no-repeat;
   transition: background-size 0.2s ease-in-out;
+}
+
+ul {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-position: above;
+  margin-bottom: -30px;
+}
+
+img {
+  margin: 0 auto;
 }
 
 a:hover {
