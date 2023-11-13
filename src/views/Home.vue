@@ -227,6 +227,10 @@ const askAi = async () => {
     streaming: true,
   };
 
+  // Clear the prompt after saving contents to be used later in .call 
+  const userPrompt = content.value;
+  content.value = "";
+
   // ==== First check if the chat request is a normal one with no need to use an agent
   if (!serpAPIAgentOn.value) {
 
@@ -240,7 +244,7 @@ const askAi = async () => {
         askedAiCalledPreviously = true;
       }
 
-      aiQuery.value = `🧑 ${content.value}`;
+      aiQuery.value = `🧑 ${userPrompt}`;
       aiResponse.value = `🤖 ${insertStarterText} `;
 
       const chat = new ChatOpenAI(openAILLMOptions);
@@ -250,7 +254,7 @@ const askAi = async () => {
           systemPrompt.value,
         ],
         new MessagesPlaceholder("history"),
-        ["human", content.value],
+        ["human", userPrompt],
       ]);
 
       const memory = new BufferMemory({ returnMessages: true, memoryKey: "history" });
@@ -261,7 +265,7 @@ const askAi = async () => {
       });
 
       await chain.call({
-        input: content.value,
+        input: userPrompt,
         signal: signal,
         callbacks: [
           {
@@ -272,9 +276,6 @@ const askAi = async () => {
         ]
 
       });
-
-      // Clear the prompt
-      content.value = "";
       // --------- End construct the response box ----------------- //
     } catch (error) {
       // Handle .call() request errors
@@ -302,9 +303,8 @@ const askAi = async () => {
     let insertStarterText = starterText();
     serpQueryPending.value = true;
 
-
     // Construct URL for fetch
-    const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}&llmOptions=${JSON.stringify(openAILLMOptions)}&prefix=${prefix}&userinput=${content.value}`;
+    const URL = `/.netlify/functions/serpapi?serpkey=${SerpAPIDecryptedString}&openaikey=${openAIDecryptedString}&llmOptions=${JSON.stringify(openAILLMOptions)}&prefix=${prefix}&userinput=${userPrompt}`;
 
     if (askedAiCalledPreviously) {
       aiConversation.value = `${aiQuery.value} \n ${aiResponse.value} \n ${aiConversation.value} \n`;
@@ -312,7 +312,7 @@ const askAi = async () => {
       askedAiCalledPreviously = true;
     }
 
-    aiQuery.value = `🧑 ${content.value}`;
+    aiQuery.value = `🧑 ${userPrompt}`;
     aiResponse.value = `🤖 ${insertStarterText} `;
 
     // Submit User input to OpenAI via Netlify Serverless function
@@ -349,11 +349,8 @@ const askAi = async () => {
       .finally(() => {
         btnText.value = BTN_TEXT;
         cancelButtonVisible.value = false;
-        // Clear the prompt
-        content.value = "";
       }
       );
-
 
   } // ---------- End of else if ------------------------- //
   else {

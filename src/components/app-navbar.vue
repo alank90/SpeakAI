@@ -48,9 +48,11 @@
 }
 
 li {
-  background-image: linear-gradient(#121211, #070707);
+  padding: 1em .2em;
+  text-decoration: none;
+  background-image: linear-gradient(#121211, #34302b);
   background-size: 0 0.1em;
-  background-position-y: 85%;
+  background-position-y: 70%;
   background-position-x: 50%;
   background-repeat: no-repeat;
   transition: background-size 0.2s ease-in-out;
@@ -58,6 +60,6 @@ li {
 
 li:hover {
   text-decoration-color: var(--main-theme-color);
-  background-size: 90% 0.1em;
+  background-size: 100% 0.1em;
 }
 </style>

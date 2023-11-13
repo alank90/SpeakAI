@@ -22,16 +22,18 @@
     <ul>Important!</ul>
     <p>
       - Storing API keys, even though encrypted, in the browser and sending the AI requests
-      directly
-      from
-      the browser exposes your keys to the world and is inherently insecure. This site is
-      intended only to get you started designing prompts in chatGPT. Since most people will only be using the free account
-      this mitigates your exposure somewhat. If you decide to start paying a subscription fee for more usage I strongly
-      urge you to
-      to go to the <a href="https://platform.openai.com/account/limits">Usage limits page</a> and set some hard limits on
+      directly from the browser exposes your keys to the world and is inherently insecure. Without getting too technical,
+      normally
+      you would store your keys on the backend server to keep them from prying eyes. This site is
+      intended only to get you started designing prompts in chatGPT. Since most people will only be using the free
+      account this mitigates your exposure somewhat. If you decide to start paying a subscription fee for more usage I
+      strongly
+      urge you to go to the <a href="https://platform.openai.com/account/limits">Usage limits page</a> and set some hard
+      limits on
       your account usage like I do.
-      <img src="../assets/images/usage_limits.png" alt="Image limits page">
     </p>
+    <img src="../assets/images/usage_limits.png" alt="Image limits page">
+
   </main>
 
   <footer class="page-footer">&copy; 2023 by <a href="https://alank-portfolio.netlify.app/" target="_blank">Alan
@@ -48,7 +50,7 @@ h1 {
 }
 
 p {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   max-width: 700px;
   margin: 20px auto;
   font-weight: 600;
@@ -64,26 +66,13 @@ footer>p {
 
 a {
   padding: 1em .2em;
-  text-transform: uppercase;
   text-decoration: none;
   background-image: linear-gradient(#121211, #34302b);
-  background-size: 0% 0.1em;
-  background-position-y: 75%;
+  background-size: 0 0.1em;
+  background-position-y: 70%;
   background-position-x: 50%;
   background-repeat: no-repeat;
   transition: background-size 0.2s ease-in-out;
-}
-
-ul {
-  font-size: 1.6rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-position: above;
-  margin-bottom: -30px;
-}
-
-img {
-  margin: 0 auto;
 }
 
 a:hover {
@@ -105,6 +94,19 @@ a:visited {
 
 a:focus {
   background-size: 100% 0.1em;
+}
+
+ul {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+  text-underline-position: above;
+  margin-bottom: -15px;
+}
+
+img {
+  margin: 0 auto;
 }
 
 footer {
